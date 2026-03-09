@@ -917,6 +917,7 @@
         <a class="nav-link" href="#galeria">Galería</a>
         <a class="nav-link" href="#transparencia">Transparencia</a>
         <a class="nav-link" href="#ruta">Ruta</a>
+        <a class="btn btn-soft" href="dashboard-admin.html">Admin</a>
         <a class="btn btn-primary" href="emitir-certificados.html">Emitir</a>
       </nav>
     </div>
@@ -940,6 +941,7 @@
           <a class="btn btn-primary" href="emitir-certificados.html">Ir a emitir certificados</a>
           <a class="btn btn-soft" href="consultar-certificados.html">Ir a consulta pública</a>
           <a class="btn btn-soft" href="institucional.html">Ver perfil institucional</a>
+          <a class="btn btn-soft" href="dashboard-admin.html">Ir al dashboard admin</a>
         </div>
       </div>
       <aside class="hero-panel">
