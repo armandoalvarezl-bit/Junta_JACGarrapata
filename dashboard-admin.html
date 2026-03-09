@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin | Vereda La Garrapata</title>
+  <link rel="icon" type="image/png" href="imagenes/logo-jac-transparente.png">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;700;800&display=swap");
+
+    :root {
+      --ink: #122842;
+      --muted: #4e6075;
+      --bg: #f8f3e7;
+      --paper: #fffdf7;
+      --line: #d9ccb1;
+      --primary: #1a2f79;
+      --primary-2: #27539d;
+      --accent: #ac7424;
+      --ok: #2f7a47;
+      --err: #b14545;
+      --warn: #8f5d11;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Manrope", sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(26, 47, 121, 0.24), transparent 40%),
+        radial-gradient(circle at 96% 18%, rgba(172, 116, 36, 0.24), transparent 36%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1880px, 98%);
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background: rgba(248, 243, 231, 0.94);
+      border-bottom: 1px solid rgba(217, 204, 177, 0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid rgba(26, 47, 121, 0.2);
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 10px 22px rgba(18, 40, 66, 0.2);
+      flex-shrink: 0;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .brand strong {
+      display: block;
+      line-height: 1.2;
+      font-size: 1rem;
+    }
+
+    .brand span {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.86rem;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 150ms ease, filter 150ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(0.98);
+    }
+
+    .btn-primary {
+      background: linear-gradient(140deg, var(--primary), var(--primary-2));
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(26, 47, 121, 0.3);
+    }
+
+    .btn-danger {
+      background: #8f3636;
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(143, 54, 54, 0.24);
+    }
+
+    .btn-soft {
+      background: #eee0c5;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .main {
+      padding: 22px 0 36px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero {
+      background: linear-gradient(140deg, #fffcf5, #f4e7ce);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.58;
+      max-width: 72ch;
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(20, 35, 67, 0.1);
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 1.06rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 1020px) {
+      .grid-2 {
+        grid-template-columns: 1.2fr 0.8fr;
+      }
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    @media (min-width: 760px) {
+      .metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px;
+    }
+
+    .metric strong {
+      display: block;
+      font-family: "Fraunces", serif;
+      font-size: 1.7rem;
+      line-height: 1.05;
+      color: var(--primary);
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: end;
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      font-size: 0.85rem;
+      color: #324865;
+    }
+
+    input, select, textarea {
+      font: inherit;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      padding: 9px 10px;
+      min-width: 0;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 72px;
+    }
+
+    .input-grow { flex: 1; min-width: 220px; }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      overflow: auto;
+      max-height: 360px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid #e4d8c2;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #efe0c3;
+      z-index: 1;
+      color: #253a57;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .status {
+      margin: 0;
+      min-height: 18px;
+      font-size: 0.9rem;
+      color: var(--ok);
+    }
+
+    .status.error { color: var(--err); }
+    .status.warn { color: var(--warn); }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    @media (min-width: 700px) {
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .actions {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .access-wrap {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .access-row {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 560px) {
+      .access-row {
+        grid-template-columns: 1fr auto;
+      }
+    }
+
+    .access-note {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: #6f5324;
+      line-height: 1.45;
+    }
+
+    .toast-wrap {
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 2000;
+      display: grid;
+      gap: 8px;
+      width: min(360px, calc(100vw - 20px));
+    }
+
+    .toast {
+      background: #1d2f5f;
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.86rem;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success { background: #2b6e44; }
+    .toast.error { background: #8f3636; }
+    .toast.warn { background: #8f5d11; }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <img src="imagenes/logo-jac-transparente.png" alt="">
+        </div>
+        <div>
+          <strong>Dashboard de Administracion</strong>
+          <span>JAC Vereda La Garrapata</span>
+        </div>
+      </div>
+      <div class="nav">
+        <a class="btn btn-soft" href="home.html">Volver al home</a>
+        <a class="btn btn-soft" href="institucional.html">Institucional</a>
+        <a class="btn btn-primary" href="emitir-certificados.html">Emitir clasico</a>
+        <button id="logoutBtn" class="btn btn-danger" type="button" hidden>Cerrar sesion</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main">
+    <section class="hero">
+      <h1>Panel admin de certificados y afiliados</h1>
+      <p>
+        Gestiona certificados generados, consulta la base de afiliados y emite nuevos certificados
+        desde un solo modulo.
+      </p>
+    </section>
+
+    <section id="accessCard" class="card access-wrap">
+      <h2>Acceso de administrador</h2>
+      <p class="muted">
+        Ingresa el codigo de acceso del administrador para habilitar el panel.
+      </p>
+      <div class="access-row">
+        <label>
+          Codigo admin
+          <input id="accessCodeInput" type="password" placeholder="Ingresa tu codigo de acceso">
+        </label>
+        <button id="unlockBtn" class="btn btn-primary" type="button">Ingresar</button>
+      </div>
+      <p id="accessStatus" class="status"></p>
+      <p class="access-note">
+        Nota: esta validacion es cliente. Para seguridad fuerte se recomienda proteger el backend de Apps Script.
+      </p>
+    </section>
+
+    <section id="adminPanel" hidden>
+      <div class="metrics">
+        <article class="metric">
+          <strong id="metricCerts">0</strong>
+          <span>Certificados cargados</span>
+        </article>
+        <article class="metric">
+          <strong id="metricResidents">0</strong>
+          <span>Afiliados cargados</span>
+        </article>
+        <article class="metric">
+          <strong id="metricToday">0</strong>
+          <span>Emitidos hoy</span>
+        </article>
+      </div>
+
+      <div class="grid-2" style="margin-top: 12px;">
+        <section class="card">
+          <h2>Certificados generados</h2>
+          <div class="toolbar">
+            <label class="input-grow">
+              Buscar por nombre, cedula, codigo o consecutivo
+              <input id="certSearchInput" type="text" placeholder="Ej: GAR-2026-0001 / 123456 / Juan">
+            </label>
+            <button id="refreshCertsBtn" class="btn btn-soft" type="button">Actualizar</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Consecutivo</th>
+                  <th>Codigo</th>
+                  <th>Fecha</th>
+                  <th>Nombre</th>
+                  <th>Documento</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="certTableBody">
+                <tr><td colspan="6">Sin datos.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Base de afiliados</h2>
+          <div class="toolbar">
+            <label class="input-grow">
+              Buscar afiliado
+              <input id="residentSearchInput" type="text" placeholder="Nombre, cedula o direccion">
+            </label>
+            <button id="refreshResidentsBtn" class="btn btn-soft" type="button">Actualizar</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Documento</th>
+                  <th>Direccion</th>
+                  <th>Nivel</th>
+                  <th>Correo</th>
+                </tr>
+              </thead>
+              <tbody id="residentTableBody">
+                <tr><td colspan="5">Sin datos.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p id="residentStatus" class="status"></p>
+        </section>
+      </div>
+
+      <section class="card" style="margin-top: 12px;">
+        <h2>Registrar nuevo afiliado</h2>
+        <p class="muted">
+          Crea un nuevo usuario en la base de afiliados (hoja <strong>Residentes</strong>) para luego emitir certificados.
+        </p>
+        <div class="form-grid">
+          <label>
+            Cedula
+            <input id="rDocumento" type="text" placeholder="Ej: 123456789">
+          </label>
+          <label>
+            Nombre completo
+            <input id="rNombre" type="text" placeholder="Nombre del afiliado">
+          </label>
+          <label>
+            Tipo documento
+            <select id="rTipoDoc">
+              <option value="CC">CC</option>
+              <option value="TI">TI</option>
+              <option value="CE">CE</option>
+              <option value="PA">PA</option>
+            </select>
+          </label>
+          <label>
+            Anios de residencia
+            <input id="rAnios" type="text" placeholder="Ej: 3">
+          </label>
+          <label>
+            Direccion
+            <input id="rDireccion" type="text" placeholder="Vereda La Garrapata">
+          </label>
+          <label>
+            Nivel educativo
+            <input id="rNivelEducativo" type="text" placeholder="Ej: Bachiller">
+          </label>
+          <label>
+            Grupo poblacional
+            <input id="rGrupoPoblacional" type="text" placeholder="Ej: Campesino">
+          </label>
+          <label>
+            Correo
+            <input id="rEmail" type="email" placeholder="correo@dominio.com">
+          </label>
+        </div>
+        <label style="margin-top: 8px;">
+          Motivo
+          <textarea id="rMotivo" placeholder="Motivo o referencia de registro"></textarea>
+        </label>
+        <label style="margin-top: 8px;">
+          Observaciones
+          <textarea id="rObservaciones" placeholder="Observaciones del afiliado"></textarea>
+        </label>
+        <div class="actions">
+          <button id="registerResidentBtn" class="btn btn-primary" type="button">Registrar afiliado</button>
+          <button id="clearResidentFormBtn" class="btn btn-soft" type="button">Limpiar registro</button>
+        </div>
+        <p id="registerResidentStatus" class="status"></p>
+      </section>
+
+      <section class="card" style="margin-top: 12px;">
+        <h2>Emitir certificado desde admin</h2>
+        <p class="muted">
+          El sistema valida la cedula contra afiliados y guarda el certificado en la base oficial.
+        </p>
+        <div class="form-grid">
+          <label>
+            Cedula
+            <input id="fDocumento" type="text" placeholder="Ej: 123456789">
+          </label>
+          <label>
+            Nombre completo
+            <input id="fNombre" type="text" placeholder="Nombre del afiliado">
+          </label>
+          <label>
+            Tipo documento
+            <select id="fTipoDoc">
+              <option value="CC">CC</option>
+              <option value="TI">TI</option>
+              <option value="CE">CE</option>
+              <option value="PA">PA</option>
+            </select>
+          </label>
+          <label>
+            Anios de residencia
+            <input id="fAnios" type="text" placeholder="Ej: 5">
+          </label>
+          <label>
+            Direccion
+            <input id="fDireccion" type="text" placeholder="Vereda La Garrapata">
+          </label>
+          <label>
+            Nivel educativo
+            <input id="fNivelEducativo" type="text" placeholder="Ej: Tecnologico">
+          </label>
+          <label>
+            Grupo poblacional
+            <input id="fGrupoPoblacional" type="text" placeholder="Ej: Campesino">
+          </label>
+          <label>
+            Correo
+            <input id="fEmail" type="email" placeholder="correo@dominio.com">
+          </label>
+        </div>
+        <label style="margin-top: 8px;">
+          Motivo
+          <textarea id="fMotivo" placeholder="Motivo de emision"></textarea>
+        </label>
+        <label style="margin-top: 8px;">
+          Observaciones
+          <textarea id="fObservaciones" placeholder="Observaciones adicionales"></textarea>
+        </label>
+        <div class="actions">
+          <button id="lookupResidentBtn" class="btn btn-soft" type="button">Cargar afiliado por cedula</button>
+          <button id="createCertBtn" class="btn btn-primary" type="button">Generar certificado</button>
+          <button id="clearAdminFormBtn" class="btn btn-soft" type="button">Limpiar</button>
+        </div>
+        <p id="createStatus" class="status"></p>
+        <p id="lastCreated" class="muted"></p>
+      </section>
+    </section>
+  </main>
+
+  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycby0aPuuwsRAFWZ0YliSexCwcZZPpMvWCO2CfBpNdDEWmMG5Vv-F28ChSVHNaKte2IV7/exec";
+    const ADMIN_CODE = "JAC-ADMIN-2026";
+
+    const accessCardEl = document.getElementById("accessCard");
+    const adminPanelEl = document.getElementById("adminPanel");
+    const accessCodeInputEl = document.getElementById("accessCodeInput");
+    const accessStatusEl = document.getElementById("accessStatus");
+    const logoutBtnEl = document.getElementById("logoutBtn");
+
+    const certSearchInputEl = document.getElementById("certSearchInput");
+    const residentSearchInputEl = document.getElementById("residentSearchInput");
+    const certTableBodyEl = document.getElementById("certTableBody");
+    const residentTableBodyEl = document.getElementById("residentTableBody");
+    const metricCertsEl = document.getElementById("metricCerts");
+    const metricResidentsEl = document.getElementById("metricResidents");
+    const metricTodayEl = document.getElementById("metricToday");
+    const residentStatusEl = document.getElementById("residentStatus");
+    const registerResidentStatusEl = document.getElementById("registerResidentStatus");
+    const createStatusEl = document.getElementById("createStatus");
+    const lastCreatedEl = document.getElementById("lastCreated");
+    const toastWrapEl = document.getElementById("toastWrap");
+
+    let certificates = [];
+    let residents = [];
+
+    init();
+
+    document.getElementById("unlockBtn").addEventListener("click", unlockDashboard);
+    document.getElementById("refreshCertsBtn").addEventListener("click", loadCertificates);
+    document.getElementById("refreshResidentsBtn").addEventListener("click", loadResidents);
+    document.getElementById("registerResidentBtn").addEventListener("click", registerResident);
+    document.getElementById("clearResidentFormBtn").addEventListener("click", clearResidentRegistrationForm);
+    document.getElementById("lookupResidentBtn").addEventListener("click", lookupResidentByDoc);
+    document.getElementById("createCertBtn").addEventListener("click", createCertificateFromAdmin);
+    document.getElementById("clearAdminFormBtn").addEventListener("click", clearAdminForm);
+    logoutBtnEl.addEventListener("click", logoutDashboard);
+    certSearchInputEl.addEventListener("input", renderCertificates);
+    residentSearchInputEl.addEventListener("input", renderResidents);
+    accessCodeInputEl.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        unlockDashboard();
+      }
+    });
+
+    async function init() {
+      const unlocked = sessionStorage.getItem("jac_admin_ok") === "1";
+      if (unlocked) {
+        openAdminPanel();
+        await loadAll();
+      } else {
+        closeAdminPanel();
+      }
+    }
+
+    async function unlockDashboard() {
+      const code = accessCodeInputEl.value.trim();
+      if (!code) {
+        setAccessStatus("Ingresa el codigo admin.", true);
+        return;
+      }
+      if (code !== ADMIN_CODE) {
+        setAccessStatus("Codigo incorrecto.", true);
+        showToast("Acceso denegado.", "error");
+        return;
+      }
+      setAccessStatus("Acceso autorizado.");
+      sessionStorage.setItem("jac_admin_ok", "1");
+      openAdminPanel();
+      await loadAll();
+      showToast("Dashboard habilitado.", "success");
+    }
+
+    function openAdminPanel() {
+      accessCardEl.hidden = true;
+      adminPanelEl.hidden = false;
+      logoutBtnEl.hidden = false;
+    }
+
+    function closeAdminPanel() {
+      accessCardEl.hidden = false;
+      adminPanelEl.hidden = true;
+      logoutBtnEl.hidden = true;
+    }
+
+    function logoutDashboard() {
+      const accepted = window.confirm("Se cerrara la sesion de administrador. Deseas continuar?");
+      if (!accepted) {
+        return;
+      }
+      sessionStorage.removeItem("jac_admin_ok");
+      accessCodeInputEl.value = "";
+      setAccessStatus("Sesion cerrada correctamente.");
+      closeAdminPanel();
+      showToast("Sesion cerrada.", "success");
+    }
+
+    async function loadAll() {
+      await Promise.all([loadCertificates(), loadResidents()]);
+      updateMetrics();
+    }
+
+    async function loadCertificates() {
+      if (!isApiConfigured()) {
+        setCreateStatus("Configura API_URL con tu Web App de Apps Script.", true);
+        return;
+      }
+
+      try {
+        const json = await apiRequest("GET", { action: "list", limit: "200" });
+        certificates = Array.isArray(json.data) ? json.data : [];
+        renderCertificates();
+        updateMetrics();
+      } catch (error) {
+        certificates = [];
+        renderCertificates();
+        showToast(error.message || "No se pudo cargar certificados.", "error");
+      }
+    }
+
+    async function loadResidents() {
+      if (!isApiConfigured()) {
+        setResidentStatus("Configura API_URL con tu Web App de Apps Script.", true);
+        return;
+      }
+
+      try {
+        setResidentStatus("Cargando afiliados...");
+        const query = residentSearchInputEl.value.trim();
+        const json = await apiRequest("GET", {
+          action: "residents_list",
+          limit: "200",
+          q: query
+        });
+        residents = Array.isArray(json.data) ? json.data : [];
+        renderResidents();
+        setResidentStatus("");
+        updateMetrics();
+      } catch (error) {
+        residents = [];
+        renderResidents();
+        const message = String(error && error.message ? error.message : error || "");
+        if (message.indexOf("Accion no soportada: residents_list") !== -1) {
+          setResidentStatus("Actualiza y publica el Apps Script para habilitar action=residents_list.", true);
+        } else {
+          setResidentStatus(message || "No se pudo cargar afiliados.", true);
+        }
+      }
+    }
+
+    async function registerResident() {
+      const payload = {
+        nombre: read("rNombre"),
+        tipoDoc: read("rTipoDoc") || "CC",
+        documento: read("rDocumento"),
+        anios: read("rAnios"),
+        direccion: read("rDireccion"),
+        nivelEducativo: read("rNivelEducativo"),
+        grupoPoblacional: read("rGrupoPoblacional"),
+        email: read("rEmail"),
+        motivo: read("rMotivo"),
+        observaciones: read("rObservaciones")
+      };
+
+      if (!payload.nombre || !payload.documento) {
+        setRegisterResidentStatus("Completa los campos obligatorios: nombre y cedula.", true);
+        return;
+      }
+
+      const accepted = window.confirm("Se registrara un nuevo afiliado en la base de datos. Deseas continuar?");
+      if (!accepted) {
+        showToast("Registro de afiliado cancelado.", "warn");
+        return;
+      }
+
+      try {
+        setRegisterResidentStatus("Guardando afiliado...");
+        const body = new URLSearchParams();
+        body.set("action", "residents_create");
+        body.set("payload", JSON.stringify(payload));
+        const json = await apiRequest("POST", body);
+        const resident = json.data || null;
+        if (!resident) {
+          throw new Error("No se recibio afiliado creado.");
+        }
+
+        setRegisterResidentStatus("Afiliado registrado correctamente.");
+        showToast("Afiliado registrado con exito.", "success");
+        clearResidentRegistrationForm(false);
+        await loadResidents();
+      } catch (error) {
+        const message = String(error && error.message ? error.message : error || "");
+        if (message.indexOf("Accion no soportada: residents_create") !== -1) {
+          setRegisterResidentStatus(
+            "Actualiza y publica el Apps Script para habilitar action=residents_create.",
+            true
+          );
+        } else {
+          setRegisterResidentStatus(message || "No se pudo registrar el afiliado.", true);
+        }
+        showToast(message || "No se pudo registrar el afiliado.", "error");
+      }
+    }
+
+    function clearResidentRegistrationForm(resetStatus) {
+      set("rDocumento", "");
+      set("rNombre", "");
+      set("rTipoDoc", "CC");
+      set("rAnios", "");
+      set("rDireccion", "");
+      set("rNivelEducativo", "");
+      set("rGrupoPoblacional", "");
+      set("rEmail", "");
+      set("rMotivo", "");
+      set("rObservaciones", "");
+      if (resetStatus !== false) {
+        setRegisterResidentStatus("");
+      }
+    }
+
+    function renderCertificates() {
+      const query = normalizeSearch(certSearchInputEl.value);
+      const filtered = certificates.filter(function (item) {
+        if (!query) return true;
+        const text = normalizeSearch(
+          item.consecutivo + " " + item.codigo + " " + item.nombre + " " + item.documento + " " + item.estado
+        );
+        return text.indexOf(query) !== -1;
+      });
+
+      if (!filtered.length) {
+        certTableBodyEl.innerHTML = "<tr><td colspan='6'>No hay certificados para mostrar.</td></tr>";
+        return;
+      }
+
+      certTableBodyEl.innerHTML = filtered.map(function (cert) {
+        return (
+          "<tr>" +
+          "<td>" + escapeHtml(cert.consecutivo || "-") + "</td>" +
+          "<td>" + escapeHtml(cert.codigo || "-") + "</td>" +
+          "<td>" + escapeHtml(formatDate(cert.fechaISO)) + "</td>" +
+          "<td>" + escapeHtml(cert.nombre || "-") + "</td>" +
+          "<td>" + escapeHtml((cert.tipoDoc || "") + " " + (cert.documento || "-")) + "</td>" +
+          "<td>" + escapeHtml(cert.estado || "ACTIVO") + "</td>" +
+          "</tr>"
+        );
+      }).join("");
+    }
+
+    function renderResidents() {
+      const query = normalizeSearch(residentSearchInputEl.value);
+      const filtered = residents.filter(function (item) {
+        if (!query) return true;
+        const text = normalizeSearch(
+          item.nombre + " " + item.documento + " " + item.direccion + " " + item.nivelEducativo + " " + item.email
+        );
+        return text.indexOf(query) !== -1;
+      });
+
+      if (!filtered.length) {
+        residentTableBodyEl.innerHTML = "<tr><td colspan='5'>No hay afiliados para mostrar.</td></tr>";
+        return;
+      }
+
+      residentTableBodyEl.innerHTML = filtered.map(function (row) {
+        return (
+          "<tr>" +
+          "<td>" + escapeHtml(row.nombre || "-") + "</td>" +
+          "<td>" + escapeHtml((row.tipoDoc || "") + " " + (row.documento || "-")) + "</td>" +
+          "<td>" + escapeHtml(row.direccion || "-") + "</td>" +
+          "<td>" + escapeHtml(row.nivelEducativo || "-") + "</td>" +
+          "<td>" + escapeHtml(row.email || "-") + "</td>" +
+          "</tr>"
+        );
+      }).join("");
+    }
+
+    function updateMetrics() {
+      metricCertsEl.textContent = String(certificates.length);
+      metricResidentsEl.textContent = String(residents.length);
+      const today = new Date().toISOString().slice(0, 10);
+      const countToday = certificates.filter(function (cert) {
+        return String(cert.fechaISO || "").slice(0, 10) === today;
+      }).length;
+      metricTodayEl.textContent = String(countToday);
+    }
+
+    async function lookupResidentByDoc() {
+      const documento = read("fDocumento");
+      if (!documento) {
+        setCreateStatus("Ingresa la cedula para buscar afiliado.", true);
+        return;
+      }
+      try {
+        setCreateStatus("Consultando afiliado...");
+        const json = await apiRequest("GET", { action: "find_person", documento: documento });
+        const person = json.data || null;
+        if (!person) {
+          setCreateStatus("No se encontro afiliado para esa cedula.", true);
+          return;
+        }
+        fillFormFromPerson(person);
+        setCreateStatus("Afiliado cargado correctamente.");
+        showToast("Datos del afiliado cargados.", "success");
+      } catch (error) {
+        setCreateStatus(error.message || "No se pudo consultar afiliado.", true);
+      }
+    }
+
+    async function createCertificateFromAdmin() {
+      const payload = {
+        nombre: read("fNombre"),
+        tipoDoc: read("fTipoDoc") || "CC",
+        documento: read("fDocumento"),
+        anios: read("fAnios"),
+        direccion: read("fDireccion"),
+        nivelEducativo: read("fNivelEducativo"),
+        grupoPoblacional: read("fGrupoPoblacional"),
+        email: read("fEmail"),
+        motivo: read("fMotivo"),
+        observaciones: read("fObservaciones")
+      };
+
+      if (!payload.documento || !payload.nombre || !payload.anios || !payload.direccion || !payload.motivo) {
+        setCreateStatus("Completa los campos obligatorios: cedula, nombre, anios, direccion y motivo.", true);
+        return;
+      }
+
+      const accepted = window.confirm("Se creara y guardara un certificado en la base oficial. Deseas continuar?");
+      if (!accepted) {
+        showToast("Emision cancelada.", "warn");
+        return;
+      }
+
+      try {
+        setCreateStatus("Guardando certificado...");
+        const body = new URLSearchParams();
+        body.set("action", "create");
+        body.set("payload", JSON.stringify(payload));
+        const json = await apiRequest("POST", body);
+        const cert = json.data || null;
+        if (!cert) {
+          throw new Error("No se recibio certificado creado.");
+        }
+
+        setCreateStatus("Certificado generado y guardado correctamente.");
+        lastCreatedEl.textContent =
+          "Ultimo generado: " +
+          (cert.consecutivo || "-") +
+          " | " + (cert.codigo || "-") +
+          " | " + (cert.nombre || "-") +
+          " | " + formatDate(cert.fechaISO);
+        showToast("Certificado generado con exito.", "success");
+        await loadCertificates();
+      } catch (error) {
+        setCreateStatus(error.message || "No se pudo generar el certificado.", true);
+        showToast(error.message || "No se pudo generar el certificado.", "error");
+      }
+    }
+
+    function fillFormFromPerson(person) {
+      set("fDocumento", person.documento || "");
+      set("fNombre", person.nombre || "");
+      set("fTipoDoc", person.tipoDoc || "CC");
+      set("fAnios", person.anios || "");
+      set("fDireccion", person.direccion || "");
+      set("fNivelEducativo", person.nivelEducativo || "");
+      set("fGrupoPoblacional", person.grupoPoblacional || "");
+      set("fEmail", person.email || "");
+      if (person.motivo) set("fMotivo", person.motivo);
+    }
+
+    function clearAdminForm() {
+      set("fDocumento", "");
+      set("fNombre", "");
+      set("fTipoDoc", "CC");
+      set("fAnios", "");
+      set("fDireccion", "");
+      set("fNivelEducativo", "");
+      set("fGrupoPoblacional", "");
+      set("fEmail", "");
+      set("fMotivo", "");
+      set("fObservaciones", "");
+      setCreateStatus("");
+      lastCreatedEl.textContent = "";
+    }
+
+    async function apiRequest(method, params) {
+      if (!isApiConfigured()) {
+        throw new Error("Falta configurar API_URL.");
+      }
+
+      let response;
+      if (method === "GET") {
+        const url = new URL(API_URL);
+        Object.keys(params || {}).forEach(function (key) {
+          const value = params[key];
+          if (value !== undefined && value !== null && value !== "") {
+            url.searchParams.set(key, value);
+          }
+        });
+        response = await fetch(url.toString(), { method: "GET" });
+      } else {
+        response = await fetch(API_URL, {
+          method: "POST",
+          body: params
+        });
+      }
+
+      let json;
+      try {
+        json = await response.json();
+      } catch (_error) {
+        throw new Error("Respuesta invalida del servidor de Apps Script.");
+      }
+
+      if (!json.ok) {
+        throw new Error(json.error || "Error al consultar la API.");
+      }
+      return json;
+    }
+
+    function isApiConfigured() {
+      return API_URL && API_URL.indexOf("https://script.google.com/") === 0;
+    }
+
+    function formatDate(value) {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return "-";
+      return date.toLocaleDateString("es-CO", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      });
+    }
+
+    function setAccessStatus(message, isError) {
+      accessStatusEl.textContent = message || "";
+      accessStatusEl.className = isError ? "status error" : "status";
+    }
+
+    function setResidentStatus(message, isError) {
+      residentStatusEl.textContent = message || "";
+      residentStatusEl.className = isError ? "status error" : "status";
+    }
+
+    function setRegisterResidentStatus(message, isError) {
+      registerResidentStatusEl.textContent = message || "";
+      registerResidentStatusEl.className = isError ? "status error" : "status";
+    }
+
+    function setCreateStatus(message, isError) {
+      createStatusEl.textContent = message || "";
+      createStatusEl.className = isError ? "status error" : "status";
+    }
+
+    function showToast(message, type) {
+      const text = String(message || "").trim();
+      if (!text) return;
+      const toast = document.createElement("div");
+      const tone = type === "error" || type === "success" || type === "warn" ? type : "info";
+      toast.className = "toast " + tone;
+      toast.textContent = text;
+      toastWrapEl.appendChild(toast);
+      requestAnimationFrame(function () {
+        toast.classList.add("show");
+      });
+      setTimeout(function () {
+        toast.classList.remove("show");
+        setTimeout(function () {
+          toast.remove();
+        }, 220);
+      }, 3200);
+    }
+
+    function normalizeSearch(value) {
+      return String(value || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+    }
+
+    function read(id) {
+      return String(document.getElementById(id).value || "").trim();
+    }
+
+    function set(id, value) {
+      document.getElementById(id).value = String(value || "");
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+  </script>
+</body>
+</html>
