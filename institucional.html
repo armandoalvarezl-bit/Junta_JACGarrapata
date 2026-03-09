@@ -1,0 +1,961 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Institucional | Vereda La Garrapata</title>
+  <link rel="icon" type="image/png" href="imagenes/logo-jac-transparente.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <style>
+    :root {
+      --jac-blue: #1a2f79;
+      --jac-blue-2: #27539d;
+      --jac-gold: #ac7424;
+      --jac-ink: #122842;
+      --jac-muted: #4d6177;
+      --jac-paper: #fffdf7;
+      --jac-line: #d9ccb1;
+      --jac-soft: #f8f3e7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--jac-ink);
+      font-family: "Manrope", sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(26, 47, 121, 0.24), transparent 38%),
+        radial-gradient(circle at 96% 14%, rgba(172, 116, 36, 0.25), transparent 35%),
+        linear-gradient(180deg, #f8f3e7 0%, #f0e5cf 100%);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      backdrop-filter: blur(10px);
+      background: rgba(248, 243, 231, 0.9);
+      border-bottom: 1px solid rgba(217, 204, 177, 0.9);
+    }
+
+    .brand-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid rgba(26, 47, 121, 0.2);
+      box-shadow: 0 10px 22px rgba(18, 40, 66, 0.2);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 1rem;
+      line-height: 1.2;
+      color: var(--jac-ink);
+      margin: 0;
+    }
+
+    .brand-sub {
+      color: var(--jac-muted);
+      font-size: 0.84rem;
+      margin: 0;
+    }
+
+    .btn-jac {
+      background: linear-gradient(145deg, var(--jac-blue), var(--jac-blue-2));
+      color: #fff;
+      border: 0;
+      border-radius: 999px;
+      font-weight: 800;
+      padding: 0.62rem 1.05rem;
+      box-shadow: 0 10px 22px rgba(26, 47, 121, 0.28);
+    }
+
+    .btn-jac:hover,
+    .btn-jac:focus-visible {
+      color: #fff;
+      filter: brightness(0.98);
+    }
+
+    .btn-gold {
+      background: #eee0c5;
+      color: var(--jac-ink);
+      border: 1px solid var(--jac-line);
+      border-radius: 999px;
+      font-weight: 700;
+      padding: 0.6rem 1rem;
+    }
+
+    .hero-wrap {
+      margin-top: 1.2rem;
+      border: 1px solid var(--jac-line);
+      border-radius: 1.35rem;
+      background: linear-gradient(135deg, #fffef9 0%, #f4e7ce 100%);
+      box-shadow: 0 16px 30px rgba(20, 35, 67, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-wrap::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -80px;
+      top: -90px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(26, 47, 121, 0.18), transparent 68%);
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      gap: 0.45rem;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.4rem 0.75rem;
+      background: rgba(172, 116, 36, 0.18);
+      color: #6f4d18;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .hero-title {
+      font-family: "Cinzel", serif;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      margin: 0.85rem 0 0.6rem;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      color: #142448;
+    }
+
+    .hero-text {
+      margin: 0;
+      color: var(--jac-muted);
+      line-height: 1.7;
+      max-width: 60ch;
+    }
+
+    .fact-card {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(217, 204, 177, 0.95);
+      border-radius: 0.9rem;
+      padding: 0.95rem;
+      height: 100%;
+    }
+
+    .fact-card .icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(26, 47, 121, 0.1);
+      color: var(--jac-blue);
+      font-size: 1.05rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .fact-card h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .fact-card p {
+      margin: 0.4rem 0 0;
+      color: var(--jac-muted);
+      font-size: 0.87rem;
+      line-height: 1.55;
+    }
+
+    .section-title {
+      font-family: "Cinzel", serif;
+      font-weight: 700;
+      margin: 0;
+      color: #112143;
+      font-size: clamp(1.35rem, 2.6vw, 2rem);
+    }
+
+    .section-copy {
+      margin: 0.55rem 0 0;
+      color: var(--jac-muted);
+      max-width: 74ch;
+      line-height: 1.65;
+    }
+
+    .panel {
+      background: var(--jac-paper);
+      border: 1px solid var(--jac-line);
+      border-radius: 1rem;
+      box-shadow: 0 10px 22px rgba(20, 35, 67, 0.08);
+    }
+
+    .timeline {
+      position: relative;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 12px;
+      top: 3px;
+      bottom: 3px;
+      width: 2px;
+      background: linear-gradient(180deg, rgba(26, 47, 121, 0.34), rgba(172, 116, 36, 0.36));
+    }
+
+    .timeline li {
+      position: relative;
+      margin: 0 0 1rem;
+      padding-left: 2.1rem;
+    }
+
+    .timeline li:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline li::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 0.35rem;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--jac-blue);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(26, 47, 121, 0.08);
+    }
+
+    .timeline h4 {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: #102046;
+    }
+
+    .timeline p {
+      margin: 0.35rem 0 0;
+      color: var(--jac-muted);
+      line-height: 1.58;
+      font-size: 0.9rem;
+    }
+
+    .hymn-card {
+      background: linear-gradient(180deg, #fffef9 0%, #fbf3e3 100%);
+      border: 1px solid var(--jac-line);
+      border-radius: 1rem;
+      padding: 1.1rem;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 10px 20px rgba(20, 35, 67, 0.08);
+    }
+
+    .hymn-stanza {
+      font-family: Georgia, "Times New Roman", serif;
+      margin: 0;
+      line-height: 1.7;
+      color: #202a35;
+      white-space: pre-line;
+      text-align: justify;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(26, 47, 121, 0.1);
+      color: var(--jac-blue);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .value-item {
+      border: 1px solid var(--jac-line);
+      background: #fff;
+      border-radius: 0.85rem;
+      padding: 0.8rem;
+      height: 100%;
+    }
+
+    .value-item h5 {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #102046;
+      font-weight: 800;
+    }
+
+    .value-item p {
+      margin: 0.45rem 0 0;
+      color: var(--jac-muted);
+      font-size: 0.87rem;
+      line-height: 1.55;
+    }
+
+    .organ-card {
+      border: 1px solid var(--jac-line);
+      border-radius: 0.9rem;
+      padding: 0.95rem;
+      background: #fff;
+      height: 100%;
+    }
+
+    .organ-card .role {
+      margin: 0;
+      font-size: 0.78rem;
+      color: #6f4d18;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .organ-card h5 {
+      margin: 0.35rem 0 0.3rem;
+      color: #102046;
+      font-size: 0.98rem;
+      font-weight: 800;
+    }
+
+    .organ-card p {
+      margin: 0;
+      color: var(--jac-muted);
+      line-height: 1.55;
+      font-size: 0.86rem;
+    }
+
+    .doc-link {
+      border: 1px solid var(--jac-line);
+      border-radius: 0.85rem;
+      background: #fff;
+      padding: 0.85rem;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      height: 100%;
+    }
+
+    .doc-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 18px rgba(20, 35, 67, 0.1);
+    }
+
+    .doc-link h5 {
+      margin: 0 0 0.3rem;
+      color: #102046;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .doc-link p {
+      margin: 0;
+      color: var(--jac-muted);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .partner-card {
+      border: 1px solid var(--jac-line);
+      border-radius: 1rem;
+      background: #fff;
+      padding: 0.95rem;
+      height: 100%;
+      box-shadow: 0 10px 20px rgba(20, 35, 67, 0.08);
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .partner-logo {
+      width: 100%;
+      border-radius: 0.8rem;
+      border: 1px solid #d9e1f0;
+      background: #f7fafe;
+      overflow: hidden;
+    }
+
+    .partner-logo img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .partner-card h5 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #102046;
+    }
+
+    .partner-card p {
+      margin: 0;
+      color: var(--jac-muted);
+      font-size: 0.88rem;
+      line-height: 1.58;
+    }
+
+    .project-item {
+      border: 1px solid var(--jac-line);
+      border-left: 6px solid var(--jac-blue);
+      border-radius: 0.9rem;
+      background: #fffef9;
+      padding: 0.9rem;
+      height: 100%;
+    }
+
+    .project-item h5 {
+      margin: 0;
+      font-size: 0.98rem;
+      color: #112247;
+      font-weight: 800;
+    }
+
+    .project-item p {
+      margin: 0.45rem 0 0;
+      color: var(--jac-muted);
+      font-size: 0.88rem;
+      line-height: 1.58;
+    }
+
+    .project-tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.28rem 0.62rem;
+      font-size: 0.73rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      background: rgba(172, 116, 36, 0.17);
+      color: #6f4d18;
+      margin-bottom: 0.5rem;
+    }
+
+    .site-footer {
+      border-top: 1px solid var(--jac-line);
+      color: var(--jac-muted);
+      font-size: 0.9rem;
+      padding: 1.2rem 0 1.6rem;
+      margin-top: 2rem;
+    }
+
+    .quick-access {
+      border-radius: 1rem;
+      border: 1px solid var(--jac-line);
+      background: linear-gradient(130deg, #1a2f79, #2a4d9d);
+      color: #fff;
+      padding: 1.2rem;
+      box-shadow: 0 12px 26px rgba(20, 35, 67, 0.2);
+    }
+
+    .quick-access p {
+      margin: 0.55rem 0 0;
+      opacity: 0.92;
+      line-height: 1.62;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar sticky-top">
+    <nav class="navbar navbar-expand-lg py-2">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2 me-3" href="home.html">
+          <span class="brand-logo" aria-hidden="true">
+            <img src="imagenes/logo-jac-transparente.png" alt="">
+          </span>
+          <span>
+            <span class="brand-title d-block">Vereda La Garrapata</span>
+            <span class="brand-sub d-block">Perfil institucional</span>
+          </span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Abrir menu">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto mb-3 mb-lg-0 gap-lg-1">
+            <li class="nav-item"><a class="nav-link" href="#inicios">Inicios</a></li>
+            <li class="nav-item"><a class="nav-link" href="#himno">Himno</a></li>
+            <li class="nav-item"><a class="nav-link" href="#mision-vision">Mision y vision</a></li>
+            <li class="nav-item"><a class="nav-link" href="#organo">Organo administrativo</a></li>
+            <li class="nav-item"><a class="nav-link" href="#alianzas">Alianzas y proyectos</a></li>
+            <li class="nav-item"><a class="nav-link" href="#gestion">Gestion</a></li>
+          </ul>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gold" href="home.html">Volver al home</a>
+            <a class="btn btn-jac" href="emitir-certificados.html">Emitir certificados</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container pb-4" id="inicio">
+    <section class="hero-wrap p-4 p-lg-5 mt-3 mt-lg-4" data-aos="fade-up">
+      <div class="row g-4 align-items-center position-relative">
+        <div class="col-lg-7">
+          <span class="hero-kicker"><i class="bi bi-stars"></i> Memoria institucional</span>
+          <h1 class="hero-title">La Garrapata: identidad, historia y organizacion comunitaria</h1>
+          <p class="hero-text">
+            Este espacio presenta los origenes, el marco institucional, el himno comunitario, la mision,
+            la vision y el organo administrativo de la Junta de Accion Comunal Vereda La Garrapata.
+          </p>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <a class="btn btn-jac" href="#organo">Ver junta directiva</a>
+            <a class="btn btn-gold" href="#gestion">Ver plan de gestion</a>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="row g-2">
+            <div class="col-12 col-sm-6">
+              <article class="fact-card">
+                <div class="icon"><i class="bi bi-building-check"></i></div>
+                <h3>Reconocimiento legal</h3>
+                <p>Resolucion 255 del 26/11/1991 con personeria juridica vigente.</p>
+              </article>
+            </div>
+            <div class="col-12 col-sm-6">
+              <article class="fact-card">
+                <div class="icon"><i class="bi bi-file-earmark-text"></i></div>
+                <h3>Registro</h3>
+                <p>NIT 800243416-5 y RUC 1-4884-0638 para soporte institucional.</p>
+              </article>
+            </div>
+            <div class="col-12">
+              <article class="fact-card">
+                <div class="icon"><i class="bi bi-people-fill"></i></div>
+                <h3>Representacion actual</h3>
+                <p>Presidencia: Jorge Pelferto Hernandez, responsable de firma y validacion documental.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="inicios" class="pt-4 pt-lg-5">
+      <div class="mb-3" data-aos="fade-up">
+        <h2 class="section-title">Inicios y linea historica</h2>
+        <p class="section-copy">
+          Resumen de hitos institucionales para visibilizar el proceso organizativo de la vereda
+          y fortalecer la memoria colectiva de la comunidad.
+        </p>
+      </div>
+      <div class="row g-3">
+        <div class="col-lg-7" data-aos="fade-right">
+          <article class="panel p-3 p-lg-4 h-100">
+            <ul class="timeline">
+              <li>
+                <h4>1991 - Reconocimiento oficial</h4>
+                <p>
+                  Mediante Resolucion 255 del 26 de noviembre de 1991, la Gobernacion de Antioquia
+                  reconocio la personeria juridica de la Junta de Accion Comunal Vereda La Garrapata.
+                </p>
+              </li>
+              <li>
+                <h4>Consolidacion organizativa</h4>
+                <p>
+                  Se estructuraron comites de trabajo comunitario para convivencia, infraestructura rural,
+                  participacion social y gestion administrativa.
+                </p>
+              </li>
+              <li>
+                <h4>Transformacion digital</h4>
+                <p>
+                  Se activo el sistema de emision y consulta de certificados con trazabilidad por
+                  consecutivo y codigo de verificacion.
+                </p>
+              </li>
+            </ul>
+          </article>
+        </div>
+        <div class="col-lg-5" data-aos="fade-left">
+          <article class="panel p-3 p-lg-4 h-100">
+            <span class="pill"><i class="bi bi-geo-alt-fill"></i> Territorio</span>
+            <h3 class="mt-2 mb-2 fs-5 fw-bold">Ubicacion y contexto</h3>
+            <p class="mb-2 text-secondary-emphasis">
+              Vereda La Garrapata, municipio de Caucasia, departamento de Antioquia.
+            </p>
+            <p class="mb-0 text-secondary-emphasis">
+              La organizacion comunal articula procesos de convivencia, desarrollo rural y participacion
+              ciudadana para fortalecer la calidad de vida de sus habitantes.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="himno" class="pt-4 pt-lg-5">
+      <div class="mb-3" data-aos="fade-up">
+        <h2 class="section-title">Himno comunitario</h2>
+        <p class="section-copy">
+          Espacio de referencia para letra oficial y simbolos de identidad de la vereda.
+        </p>
+      </div>
+      <div class="row g-3">
+        <div class="col-lg-8" data-aos="zoom-in">
+          <article class="hymn-card h-100">
+            <span class="pill mb-2"><i class="bi bi-music-note-beamed"></i> Letra institucional</span>
+            <p class="hymn-stanza">
+Coro:
+La Garrapata, tierra de esperanza,
+union de manos, trabajo y dignidad.
+Tu gente avanza con fe y confianza,
+defiende el campo, la paz y la verdad.
+
+Estrofa:
+Desde tus caminos nace la memoria,
+la junta cuida el bien de la comunidad.
+Con respeto, servicio y compromiso
+se escribe cada dia nuestra identidad.
+            </p>
+          </article>
+        </div>
+        <div class="col-lg-4" data-aos="fade-left">
+          <article class="panel p-3 h-100">
+            <span class="pill"><i class="bi bi-info-circle-fill"></i> Nota</span>
+            <p class="mb-0 mt-2 text-secondary-emphasis">
+              Si la asamblea aprueba una version oficial distinta, solo reemplaza este bloque de texto
+              y, si deseas, agrega el audio del himno en esta misma seccion.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="mision-vision" class="pt-4 pt-lg-5">
+      <div class="mb-3" data-aos="fade-up">
+        <h2 class="section-title">Mision, vision y principios</h2>
+        <p class="section-copy">
+          Fundamentos estrategicos que orientan la gestion de la Junta de Accion Comunal.
+        </p>
+      </div>
+      <div class="row g-3">
+        <div class="col-lg-6" data-aos="fade-right">
+          <article class="panel p-3 p-lg-4 h-100">
+            <span class="pill"><i class="bi bi-bullseye"></i> Mision</span>
+            <p class="mb-0 mt-2 text-secondary-emphasis">
+              Representar y articular a la comunidad de la Vereda La Garrapata para impulsar
+              el desarrollo integral del territorio, mediante gestion participativa, transparencia,
+              convivencia y acciones solidarias en beneficio comun.
+            </p>
+          </article>
+        </div>
+        <div class="col-lg-6" data-aos="fade-left">
+          <article class="panel p-3 p-lg-4 h-100">
+            <span class="pill"><i class="bi bi-binoculars-fill"></i> Vision</span>
+            <p class="mb-0 mt-2 text-secondary-emphasis">
+              Ser una junta comunal referente en organizacion comunitaria rural, con procesos
+              sostenibles, gestion moderna y capacidad de respuesta efectiva a las necesidades
+              sociales, educativas, ambientales y productivas de la vereda.
+            </p>
+          </article>
+        </div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-md-6 col-xl-3" data-aos="fade-up">
+          <article class="value-item">
+            <h5>Transparencia</h5>
+            <p>Rendicion de cuentas y trazabilidad de las decisiones comunitarias.</p>
+          </article>
+        </div>
+        <div class="col-md-6 col-xl-3" data-aos="fade-up" data-aos-delay="70">
+          <article class="value-item">
+            <h5>Participacion</h5>
+            <p>Inclusion activa de familias, comites y liderazgos veredales.</p>
+          </article>
+        </div>
+        <div class="col-md-6 col-xl-3" data-aos="fade-up" data-aos-delay="140">
+          <article class="value-item">
+            <h5>Responsabilidad</h5>
+            <p>Compromiso con resultados concretos para el bienestar colectivo.</p>
+          </article>
+        </div>
+        <div class="col-md-6 col-xl-3" data-aos="fade-up" data-aos-delay="210">
+          <article class="value-item">
+            <h5>Identidad local</h5>
+            <p>Defensa de la cultura, memoria y sentido de pertenencia territorial.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="organo" class="pt-4 pt-lg-5">
+      <div class="mb-3" data-aos="fade-up">
+        <h2 class="section-title">Organo administrativo de la Junta</h2>
+        <p class="section-copy">
+          Estructura base para gestionar asambleas, comites y decisiones institucionales.
+        </p>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6 col-lg-4" data-aos="fade-up">
+          <article class="organ-card">
+            <p class="role">Presidente</p>
+            <h5>Jorge Pelferto Hernandez Peña</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="70">
+          <article class="organ-card">
+            <p class="role">Vicepresidente</p>
+            <h5>Emperatriz Lopez Perez</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="140">
+          <article class="organ-card">
+            <p class="role">Tesorero</p>
+            <h5>Norelys Fernandez</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up">
+          <article class="organ-card">
+            <p class="role">Secretario</p>
+            <h5>Armando Jose Alvarez Lagares</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="70">
+          <article class="organ-card">
+            <p class="role">Fiscal</p>
+            <h5>Jose Francisco Estrada Lopez</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="140">
+          <article class="organ-card">
+            <p class="role">1° Conciliador</p>
+            <h5>Luis Enrique Estrada Urbina</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up">
+          <article class="organ-card">
+            <p class="role">2° Conciliador</p>
+            <h5>Adiela del Carmen Lobo Blanco</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="70">
+          <article class="organ-card">
+            <p class="role">3° Conciliador</p>
+            <h5>Socorro Ines Villareal Acosta</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="140">
+          <article class="organ-card">
+            <p class="role">C.T. Deportes</p>
+            <h5>Juan Francisco Lopez Perez</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up">
+          <article class="organ-card">
+            <p class="role">C.T. Obras</p>
+            <h5>Erika Maria Ramos Lopez</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="70">
+          <article class="organ-card">
+            <p class="role">C.T. Empresarial</p>
+            <h5>Jorge Luis Perez Montiel</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="140">
+          <article class="organ-card">
+            <p class="role">C.T. Salud</p>
+            <h5>Neida Luz Ramos Estrada</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up">
+          <article class="organ-card">
+            <p class="role">1° Delegado</p>
+            <h5>Senen Manuel Serpa Jimenez</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="70">
+          <article class="organ-card">
+            <p class="role">2° Delegado</p>
+            <h5>Leonor Maria Lopez Perez</h5>
+          </article>
+        </div>
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="140">
+          <article class="organ-card">
+            <p class="role">3° Delegado</p>
+            <h5>Yeimy Sadith Alian Alvarez</h5>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="alianzas" class="pt-4 pt-lg-5">
+      <div class="mb-3" data-aos="fade-up">
+        <h2 class="section-title">Alianzas y proyectos en ejecucion</h2>
+        <p class="section-copy">
+          Proyectos activos con aliados estrategicos para fortalecer productividad, inclusion social y
+          desarrollo territorial en la Vereda La Garrapata.
+        </p>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-4" data-aos="fade-up">
+          <article class="partner-card">
+            <div class="partner-logo">
+              <img src="https://cdn.prod.website-files.com/66c623b1be3c82e1f1d2c520/66c65fed43f9de87fdc6e996_Mineros%20Logo.png" alt="Logo Mineros">
+            </div>
+            <h5>Aliado: Mineros</h5>
+            <p>
+              Acompañamiento a iniciativas de fortalecimiento comunitario, capacitacion en gestion social
+              y articulacion para proyectos de desarrollo local.
+            </p>
+          </article>
+        </div>
+        <div class="col-lg-4" data-aos="fade-up" data-aos-delay="80">
+          <article class="partner-card">
+            <div class="partner-logo">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJ7j7lnQWtOWT3JZpkLYAJ_oE2L-afc-Ci0Q&s" alt="Logo Agroforestal">
+            </div>
+            <h5>Aliado: Sector agroforestal</h5>
+            <p>
+              Implementacion de practicas sostenibles, apoyo a productividad rural y manejo responsable
+              de recursos naturales.
+            </p>
+          </article>
+        </div>
+        <div class="col-lg-4" data-aos="fade-up" data-aos-delay="160">
+          <article class="partner-card">
+            <div class="partner-logo">
+              <img src="imagenes/logo-ocensa.png" alt="Logo Ocensa">
+            </div>
+            <h5>Aliado: Ocensa</h5>
+            <p>
+              Presencia de Ocensa como aliado para impulsar procesos de desarrollo territorial,
+              fortalecimiento comunitario y articulacion institucional en la vereda.
+            </p>
+          </article>
+        </div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        <div class="col-lg-4" data-aos="fade-right">
+          <article class="project-item">
+            <span class="project-tag">Proyecto 01</span>
+            <h5>Escuela de liderazgo comunitario</h5>
+            <p>
+              Formacion de lideres locales en organizacion comunal, participacion y formulacion de iniciativas.
+            </p>
+          </article>
+        </div>
+        <div class="col-lg-4" data-aos="fade-up">
+          <article class="project-item">
+            <span class="project-tag">Proyecto 02</span>
+            <h5>Fortalecimiento agroforestal veredal</h5>
+            <p>
+              Acompañamiento tecnico a familias productoras para mejorar rendimiento y sostenibilidad ambiental.
+            </p>
+          </article>
+        </div>
+        <div class="col-lg-4" data-aos="fade-left">
+          <article class="project-item">
+            <span class="project-tag">Proyecto 03</span>
+            <h5>Ruta de inclusion social y prevencion</h5>
+            <p>
+              Acciones coordinadas con aliados para promover oportunidades, tejido social y convivencia territorial.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="gestion" class="pt-4 pt-lg-5">
+      <div class="row g-3">
+        <div class="col-lg-7" data-aos="fade-right">
+          <h2 class="section-title">Gestion institucional y normatividad</h2>
+          <p class="section-copy">
+            Repositorio para actas, reglamentos y documentos de consulta publica de la organizacion.
+          </p>
+          <div class="row g-2 mt-1">
+            <div class="col-md-6">
+              <a class="doc-link" href="doc/JUNTA%20DE%20ACCION%20COMUNAL%20VEREDA%20LA%20GARRAPATA.pdf" target="_blank" rel="noopener noreferrer">
+                <h5><i class="bi bi-file-earmark-pdf me-1"></i> Documento base JAC</h5>
+                <p>Consulta de soporte institucional en formato PDF.</p>
+              </a>
+            </div>
+            <div class="col-md-6">
+              <a class="doc-link" href="consultar-certificados.html">
+                <h5><i class="bi bi-patch-check-fill me-1"></i> Verificacion publica</h5>
+                <p>Consulta de certificados emitidos por codigo o cedula.</p>
+              </a>
+            </div>
+            <div class="col-md-6">
+              <a class="doc-link" href="emitir-certificados.html">
+                <h5><i class="bi bi-file-earmark-plus-fill me-1"></i> Emision oficial</h5>
+                <p>Registro y generacion de certificados con trazabilidad.</p>
+              </a>
+            </div>
+            <div class="col-md-6">
+              <a class="doc-link" href="home.html#transparencia">
+                <h5><i class="bi bi-journal-check me-1"></i> Transparencia</h5>
+                <p>Publicacion de informes, controles y seguimiento comunitario.</p>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5" data-aos="fade-left">
+          <article class="quick-access h-100">
+            <span class="pill bg-light text-dark"><i class="bi bi-lightning-fill"></i> Ruta recomendada</span>
+            <h3 class="mt-2 mb-0 fs-4 fw-bold">Uso rapido del sistema comunal</h3>
+            <p>1. Registra los datos de la persona en el modulo de emision.</p>
+            <p>2. Genera certificado con codigo de verificacion y consecutivo.</p>
+            <p>3. Valida o descarga el documento desde consulta publica.</p>
+            <p>4. Presenta reportes en asamblea con respaldo documental.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer d-flex flex-wrap justify-content-between gap-2">
+      <span>Junta de Accion Comunal Vereda La Garrapata | Perfil institucional</span>
+      <span id="yearLabel"></span>
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    (function () {
+      AOS.init({
+        duration: 650,
+        once: true,
+        offset: 70
+      });
+
+      var yearLabel = document.getElementById("yearLabel");
+      if (yearLabel) {
+        var now = new Date();
+        var text = new Intl.DateTimeFormat("es-CO", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric"
+        }).format(now);
+        yearLabel.textContent = "Actualizado " + text;
+      }
+    })();
+  </script>
+</body>
+</html>
+

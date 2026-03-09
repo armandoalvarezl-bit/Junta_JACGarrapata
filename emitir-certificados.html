@@ -1,0 +1,1248 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emitir Certificados | Vereda La Garrapata</title>
+  <link rel="icon" type="image/png" href="imagenes/logo-jac-transparente.png">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;700&display=swap");
+
+    :root {
+      --ink: #122842;
+      --muted: #4e6075;
+      --bg: #f8f3e7;
+      --paper: #fffdf7;
+      --line: #d9ccb1;
+      --primary: #1a2f79;
+      --primary-2: #27539d;
+      --accent: #ac7424;
+      --ok: #2f7a47;
+      --err: #b14545;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(26, 47, 121, 0.24), transparent 40%),
+        radial-gradient(circle at 96% 18%, rgba(172, 116, 36, 0.24), transparent 36%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1220px, 92%);
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(248, 243, 231, 0.92);
+      border-bottom: 1px solid rgba(217, 204, 177, 0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid rgba(26, 47, 121, 0.2);
+      box-shadow: 0 10px 22px rgba(18, 40, 66, 0.2);
+      display: block;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .brand strong {
+      display: block;
+      line-height: 1.2;
+      font-size: 0.98rem;
+    }
+
+    .brand span {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 15px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 150ms ease, filter 150ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(0.98);
+    }
+
+    .btn-primary {
+      background: linear-gradient(140deg, var(--primary), var(--primary-2));
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(26, 47, 121, 0.3);
+    }
+
+    .btn-soft {
+      background: #eee0c5;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .main {
+      padding: 24px 0 34px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .hero {
+      background: linear-gradient(140deg, #fffcf5, #f4e7ce);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+    }
+
+    .hero p {
+      margin: 9px 0 0;
+      color: var(--muted);
+      line-height: 1.58;
+      max-width: 66ch;
+    }
+
+    .layout {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 1040px) {
+      .layout {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 10px 26px rgba(20, 35, 67, 0.1);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+
+    form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 720px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    label {
+      font-size: 0.9rem;
+      display: grid;
+      gap: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      font: inherit;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      padding: 10px 11px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 72px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .status {
+      margin: 0;
+      min-height: 18px;
+      font-size: 0.9rem;
+      color: var(--ok);
+    }
+
+    .status.error {
+      color: var(--err);
+    }
+
+    .toast-wrap {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2000;
+      display: grid;
+      gap: 8px;
+      width: min(360px, calc(100vw - 24px));
+    }
+
+    .toast {
+      background: #1d2f5f;
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background: #2b6e44;
+    }
+
+    .toast.error {
+      background: #8f3636;
+    }
+
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2100;
+      background: rgba(18, 34, 70, 0.5);
+      display: grid;
+      place-items: center;
+      padding: 12px;
+    }
+
+    .confirm-overlay[hidden] {
+      display: none !important;
+    }
+
+    .confirm-box {
+      width: min(460px, 100%);
+      background: #fff9ef;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+      display: grid;
+      gap: 10px;
+    }
+
+    .confirm-box h3 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .confirm-box p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.92rem;
+    }
+
+    .confirm-actions {
+      display: flex;
+      justify-content: end;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .lookup-panel {
+      border: 1px dashed #d0bc95;
+      border-radius: 12px;
+      padding: 11px;
+      background: #fffef8;
+      display: grid;
+      gap: 8px;
+    }
+
+    .lookup-panel strong {
+      font-size: 0.9rem;
+      color: var(--primary);
+    }
+
+    .lookup-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    @media (min-width: 700px) {
+      .lookup-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .lookup-item {
+      border: 1px solid #e4d7bf;
+      border-radius: 9px;
+      background: #fff;
+      padding: 8px;
+      display: grid;
+      gap: 3px;
+    }
+
+    .lookup-item span {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .lookup-item strong {
+      font-size: 0.9rem;
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .preview {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
+      background: #fff;
+      min-height: 520px;
+      font-family: "Times New Roman", serif;
+      color: #000;
+    }
+
+    .cert-header {
+      text-align: center;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    .cert-title {
+      margin: 0;
+      font-size: 1.14rem;
+      letter-spacing: 0.01em;
+    }
+
+    .cert-subline {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .cert-ruc {
+      margin: 0;
+      font-size: 1.02rem;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .cert-body p {
+      margin: 0 0 28px;
+      line-height: 1.48;
+      font-size: 1.06rem;
+      text-align: justify;
+    }
+
+    .cert-center {
+      text-align: center !important;
+    }
+
+    .cert-signature {
+      margin-top: 115px;
+      width: 260px;
+    }
+
+    .cert-sign-line {
+      width: 100%;
+      border-top: 1px solid #000;
+      margin-bottom: 6px;
+    }
+
+    .preview-meta {
+      margin-top: 18px;
+      font-size: 0.86rem;
+      color: #2d2d2d;
+      display: grid;
+      gap: 2px;
+    }
+
+    .verify {
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      max-height: 300px;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid #ede4d5;
+      font-size: 0.87rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f3ead9;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    footer {
+      margin-top: 14px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      font-size: 0.88rem;
+    }
+
+    @page {
+      size: letter;
+      margin: 20mm;
+    }
+
+    @media print {
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #fff !important;
+      }
+
+      header,
+      .hero,
+      .layout > .card:first-child,
+      .layout > .card h2,
+      .verify,
+      .history-wrap,
+      footer {
+        display: none !important;
+      }
+
+      .container,
+      .main,
+      .layout,
+      .layout > .card:last-child {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+      }
+
+      #certPreview {
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        font-family: "Times New Roman", serif !important;
+        color: #000 !important;
+      }
+
+      #certPreview .cert-title {
+        font-size: 12pt;
+      }
+
+      #certPreview .cert-subline,
+      #certPreview .cert-ruc {
+        font-size: 11pt;
+      }
+
+      #certPreview .cert-body p {
+        margin: 0 0 20pt;
+        line-height: 1.42;
+        font-size: 12pt;
+      }
+
+      #certPreview .cert-signature {
+        margin-top: 64pt;
+        width: 230pt;
+      }
+
+      #certPreview .preview-meta {
+        margin-top: 18pt;
+        font-size: 10pt;
+        color: #000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <img src="imagenes/logo-jac-transparente.png" alt="" loading="eager" decoding="async">
+        </div>
+        <div>
+          <strong>Módulo de Emisión</strong>
+          <span>Vereda La Garrapata</span>
+        </div>
+      </div>
+      <div class="nav">
+        <a class="btn btn-soft" href="home.html">Volver al home</a>
+        <a class="btn btn-soft" href="consultar-certificados.html">Consulta pública</a>
+        <button class="btn btn-primary" type="button" id="printBtn">Imprimir certificado</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main">
+    <section class="hero">
+      <h1>Emisión de certificados de residencia</h1>
+      <p>
+        Registra la información del residente, genera el documento y guarda trazabilidad con consecutivo
+        y código de verificación.
+      </p>
+    </section>
+
+    <section class="layout">
+      <article class="card">
+        <h2>Formulario de emisión</h2>
+        <form id="certForm">
+          <div class="grid">
+            <label>Nombre completo
+              <input id="nombre" required readonly>
+            </label>
+            <label>Tipo de documento
+              <select id="tipoDoc" disabled>
+                <option value="CC">CC</option>
+                <option value="TI">TI</option>
+                <option value="CE">CE</option>
+                <option value="Pasaporte">Pasaporte</option>
+              </select>
+            </label>
+            <label>Número de documento
+              <input id="documento" required>
+            </label>
+            <label>Años de residencia
+              <input id="anios" type="number" min="0" required readonly>
+            </label>
+            <label>Dirección o sector
+              <input id="direccion" required readonly>
+            </label>
+            <label>Nivel educativo
+              <input id="nivelEducativo" readonly>
+            </label>
+            <label>Grupo poblacional
+              <input id="grupoPoblacional" readonly>
+            </label>
+            <label>Correo electrónico
+              <input id="email" readonly>
+            </label>
+            <label>Motivo del certificado
+              <input id="motivo" placeholder="Ej: trámite de salud o educativo" required>
+            </label>
+            <label>Nombre del firmante
+              <input id="firmante" value="Jorge Pelferto Hernandez" readonly required>
+            </label>
+            <label>Cargo del firmante
+              <input id="cargoFirmante" value="Presidente Junta" readonly required>
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn btn-soft" type="button" id="buscarCedulaBtn">Consultar cédula y cargar datos</button>
+          </div>
+          <p id="lookupStatus" class="status"></p>
+          <section id="lookupResult" class="lookup-panel" hidden>
+            <strong>Datos encontrados por cédula</strong>
+            <div class="lookup-grid">
+              <div class="lookup-item"><span>Nombre</span><strong id="lookupNombre">-</strong></div>
+              <div class="lookup-item"><span>Documento</span><strong id="lookupDocumento">-</strong></div>
+              <div class="lookup-item"><span>Tipo documento</span><strong id="lookupTipoDoc">-</strong></div>
+              <div class="lookup-item"><span>Años residencia</span><strong id="lookupAnios">-</strong></div>
+              <div class="lookup-item"><span>Dirección</span><strong id="lookupDireccion">-</strong></div>
+              <div class="lookup-item"><span>Nivel educativo</span><strong id="lookupNivelEducativo">-</strong></div>
+              <div class="lookup-item"><span>Grupo poblacional</span><strong id="lookupGrupoPoblacional">-</strong></div>
+              <div class="lookup-item"><span>Correo electrónico</span><strong id="lookupEmail">-</strong></div>
+              <div class="lookup-item"><span>Origen</span><strong id="lookupSource">-</strong></div>
+            </div>
+          </section>
+          <label>Observaciones
+            <textarea id="observaciones" placeholder="Campo opcional"></textarea>
+          </label>
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Generar certificado</button>
+            <button class="btn btn-soft" type="button" id="clearFormBtn">Limpiar formulario</button>
+          </div>
+          <p id="status" class="status"></p>
+        </form>
+      </article>
+
+      <article class="card">
+        <h2>Vista previa y verificación</h2>
+        <section class="preview" id="certPreview">
+          <div class="cert-header">
+            <p class="cert-title">JUNTA DE ACCION COMUNAL VEREDA LA GARRAPATA</p>
+            <p class="cert-subline">ID: 1682 NIT: 800243416-5 CAUCASIA - ANTIOQUIA</p>
+            <p class="cert-subline">DEPARTAMENTO ADMINISTRATIVO - SECRETARIADO</p>
+            <p class="cert-ruc">RUC: 1-4884-40638</p>
+          </div>
+          <div class="cert-body">
+            <p>Consulta la cédula para cargar datos y emitir el certificado.</p>
+          </div>
+          <div class="preview-meta">
+            <span>Consecutivo: -</span>
+            <span>Código de verificación: -</span>
+            <span>Fecha: -</span>
+          </div>
+        </section>
+
+        <div class="verify">
+          <label>Consulta por cédula o código de verificación
+            <input id="codigoBusqueda" placeholder="Ej: 123456789 o GAR-AB12CD">
+          </label>
+          <button class="btn btn-soft" type="button" id="verifyBtn">Consultar certificado</button>
+          <p id="verifyStatus" class="status"></p>
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      Organización Comunitaria Vereda La Garrapata | Módulo de emisión documental
+    </footer>
+  </main>
+
+  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+  <div id="confirmOverlay" class="confirm-overlay" hidden>
+    <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+      <h3 id="confirmTitle">Confirmar acción</h3>
+      <p id="confirmMessage">¿Deseas continuar?</p>
+      <div class="confirm-actions">
+        <button id="confirmCancelBtn" class="btn btn-soft" type="button">Cancelar</button>
+        <button id="confirmAcceptBtn" class="btn btn-primary" type="button">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbx9KA3N_sl6b_y-7WYr1MsLa3NMYnx-obXHVsG9I4f_FskL8b2Bm3bGMPCUD1CoM5iR/exec";
+    const SIGNER_NAME = "Jorge Pelferto Hernandez";
+    const SIGNER_ID = "CC:98651838";
+    const SIGNER_ROLE = "Presidente Junta";
+    const form = document.getElementById("certForm");
+    const statusEl = document.getElementById("status");
+    const verifyStatusEl = document.getElementById("verifyStatus");
+    const lookupStatusEl = document.getElementById("lookupStatus");
+    const lookupResultEl = document.getElementById("lookupResult");
+    const lookupNombreEl = document.getElementById("lookupNombre");
+    const lookupDocumentoEl = document.getElementById("lookupDocumento");
+    const lookupTipoDocEl = document.getElementById("lookupTipoDoc");
+    const lookupAniosEl = document.getElementById("lookupAnios");
+    const lookupDireccionEl = document.getElementById("lookupDireccion");
+    const lookupNivelEducativoEl = document.getElementById("lookupNivelEducativo");
+    const lookupGrupoPoblacionalEl = document.getElementById("lookupGrupoPoblacional");
+    const lookupEmailEl = document.getElementById("lookupEmail");
+    const lookupSourceEl = document.getElementById("lookupSource");
+    const previewEl = document.getElementById("certPreview");
+    const toastWrapEl = document.getElementById("toastWrap");
+    const confirmOverlayEl = document.getElementById("confirmOverlay");
+    const confirmTitleEl = document.getElementById("confirmTitle");
+    const confirmMessageEl = document.getElementById("confirmMessage");
+    const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+    const confirmAcceptBtn = document.getElementById("confirmAcceptBtn");
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const documentoInputEl = document.getElementById("documento");
+    let ultimoCertificado = null;
+    let confirmResolver = null;
+
+    init();
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      const accepted = await askConfirmation(
+        "Confirmar emisión",
+        "Se generará y guardará un nuevo certificado en la base. ¿Deseas continuar?",
+        "Generar certificado"
+      );
+      if (!accepted) {
+        showToast("Emisión cancelada.", "info");
+        return;
+      }
+      await createCertificate();
+    });
+
+    document.getElementById("clearFormBtn").addEventListener("click", async function () {
+      if (!hasFormContent()) {
+        clearForm();
+        return;
+      }
+      const accepted = await askConfirmation(
+        "Limpiar formulario",
+        "Se perderán los datos cargados en el formulario. ¿Deseas continuar?",
+        "Limpiar"
+      );
+      if (!accepted) {
+        showToast("Limpieza cancelada.", "info");
+        return;
+      }
+      clearForm();
+      showToast("Formulario limpio.", "success");
+    });
+    document.getElementById("buscarCedulaBtn").addEventListener("click", lookupByDocument);
+    document.getElementById("verifyBtn").addEventListener("click", verifyByCode);
+    confirmCancelBtn.addEventListener("click", function () {
+      resolveConfirmation(false);
+    });
+    confirmAcceptBtn.addEventListener("click", function () {
+      resolveConfirmation(true);
+    });
+    confirmOverlayEl.addEventListener("click", function (event) {
+      if (event.target === confirmOverlayEl) {
+        resolveConfirmation(false);
+      }
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && confirmResolver) {
+        resolveConfirmation(false);
+      }
+    });
+    documentoInputEl.addEventListener("input", function () {
+      document.getElementById("nombre").value = "";
+      document.getElementById("tipoDoc").value = "CC";
+      document.getElementById("anios").value = "";
+      document.getElementById("direccion").value = "";
+      document.getElementById("nivelEducativo").value = "";
+      document.getElementById("grupoPoblacional").value = "";
+      document.getElementById("email").value = "";
+      setLookupStatus("");
+      clearLookupResult();
+    });
+    document.getElementById("printBtn").addEventListener("click", function () {
+      if (!ultimoCertificado) {
+        setStatus("Primero genera o consulta un certificado.", true);
+        return;
+      }
+      window.print();
+    });
+
+    async function init() {
+      applySignerDefaults();
+      if (!isApiConfigured()) {
+        setStatus("Configura API_URL con tu Web App de Apps Script.", true);
+        return;
+      }
+    }
+
+    function applySignerDefaults() {
+      document.getElementById("firmante").value = SIGNER_NAME;
+      document.getElementById("cargoFirmante").value = SIGNER_ROLE;
+    }
+
+    async function createCertificate() {
+      const documento = read("documento");
+      if (!documento) {
+        setStatus("Ingresa la cédula.", true);
+        return;
+      }
+      if (!isApiConfigured()) {
+        setStatus("Configura API_URL para validar cédulas en línea.", true);
+        return;
+      }
+
+      toggleBusy(true);
+      try {
+        setStatus("Validando cédula en la base en línea...");
+        const person = await apiFindPerson(documento);
+        if (!person) {
+          setStatus("No se puede emitir: la cédula no existe en la base de datos.", true);
+          setLookupStatus("Cédula no encontrada en la base en línea.", true);
+          clearLookupResult();
+          return;
+        }
+
+        fillFormWithPerson(person);
+        renderLookupResult(person);
+
+        const payload = {
+          nombre: read("nombre"),
+          tipoDoc: read("tipoDoc"),
+          documento: read("documento"),
+          anios: read("anios"),
+          direccion: read("direccion"),
+          nivelEducativo: read("nivelEducativo"),
+          grupoPoblacional: read("grupoPoblacional"),
+          email: read("email"),
+          motivo: read("motivo"),
+          firmante: read("firmante"),
+          cargoFirmante: read("cargoFirmante"),
+          observaciones: read("observaciones")
+        };
+
+        if (!payload.nombre || !payload.documento || !payload.anios || !payload.direccion || !payload.motivo) {
+          setStatus("Faltan datos requeridos para emitir el certificado.", true);
+          return;
+        }
+        if (!sameDocument(payload.documento, person.documento)) {
+          setStatus("La cédula del formulario no coincide con la base de datos.", true);
+          return;
+        }
+
+        setStatus("Guardando certificado en la base en línea...");
+        const cert = await apiCreate(payload);
+        ultimoCertificado = cert;
+        renderPreview(cert);
+        setStatus("Certificado generado y guardado en Google Sheets.");
+        showToast("Certificado generado correctamente.", "success");
+        verifyStatusEl.textContent = "";
+        verifyStatusEl.className = "status";
+        document.getElementById("codigoBusqueda").value = cert.codigo;
+      } catch (error) {
+        setStatus(error.message || "No fue posible generar el certificado.", true);
+        showToast(error.message || "No fue posible generar el certificado.", "error");
+      } finally {
+        toggleBusy(false);
+      }
+    }
+
+    async function verifyByCode() {
+      const raw = read("codigoBusqueda");
+      const code = raw.toUpperCase().startsWith("GAR-") ? raw.toUpperCase() : "";
+      const documento = code ? "" : raw;
+      if (!raw) {
+        setVerifyStatus("Ingresa una cédula o un código para consultar.", true);
+        return;
+      }
+      if (!isApiConfigured()) {
+        setVerifyStatus("Configura API_URL para consultar en línea.", true);
+        return;
+      }
+
+      setVerifyStatus("Consultando en línea...");
+      try {
+        const found = await apiFind({ codigo: code, documento: documento });
+        if (!found) {
+          setVerifyStatus("No se encontró un certificado con ese dato.", true);
+          return;
+        }
+
+        renderPreview(found);
+        ultimoCertificado = found;
+        setVerifyStatus(
+          "Válido: " + found.nombre + " - " + found.tipoDoc + " " + found.documento +
+          " - " + found.consecutivo + ".",
+          false
+        );
+        showToast("Certificado consultado correctamente.", "success");
+      } catch (error) {
+        setVerifyStatus(error.message || "No se pudo consultar el certificado.", true);
+        showToast(error.message || "No se pudo consultar el certificado.", "error");
+      }
+    }
+
+    async function lookupByDocument() {
+      const documento = read("documento");
+      if (!documento) {
+        setLookupStatus("Ingresa primero la cédula para consultar.", true);
+        return;
+      }
+      if (!isApiConfigured()) {
+        setLookupStatus("Configura API_URL para consultar en línea.", true);
+        return;
+      }
+
+      setLookupStatus("Consultando datos por cédula...");
+      try {
+        const person = await apiFindPerson(documento);
+        if (!person) {
+          document.getElementById("nombre").value = "";
+          setLookupStatus("No se encontraron datos para esa cédula.", true);
+          clearLookupResult();
+          return;
+        }
+        fillFormWithPerson(person);
+        renderLookupResult(person);
+        setLookupStatus("Datos cargados desde " + (person.source || "la base en línea") + ".", false);
+        showToast("Datos de cédula cargados.", "success");
+      } catch (error) {
+        document.getElementById("nombre").value = "";
+        setLookupStatus(error.message || "No se pudo consultar la cédula.", true);
+        clearLookupResult();
+        showToast(error.message || "No se pudo consultar la cédula.", "error");
+      }
+    }
+
+    function fillFormWithPerson(person) {
+      if (person.documento) document.getElementById("documento").value = person.documento;
+      document.getElementById("nombre").value = person.nombre || "";
+      if (person.tipoDoc) {
+        const tipoDocEl = document.getElementById("tipoDoc");
+        const exists = Array.from(tipoDocEl.options).some(function (opt) {
+          return opt.value === person.tipoDoc;
+        });
+        tipoDocEl.value = exists ? person.tipoDoc : "CC";
+      } else {
+        document.getElementById("tipoDoc").value = "CC";
+      }
+      document.getElementById("anios").value = person.anios || "";
+      document.getElementById("direccion").value = person.direccion || "";
+      document.getElementById("nivelEducativo").value = person.nivelEducativo || "";
+      document.getElementById("grupoPoblacional").value = person.grupoPoblacional || "";
+      document.getElementById("email").value = person.email || "";
+      if (person.motivo) document.getElementById("motivo").value = person.motivo;
+      applySignerDefaults();
+      if (person.observaciones) document.getElementById("observaciones").value = person.observaciones;
+    }
+
+    function clearForm() {
+      form.reset();
+      document.getElementById("tipoDoc").value = "CC";
+      applySignerDefaults();
+      document.getElementById("nombre").value = "";
+      setStatus("");
+      setLookupStatus("");
+      clearLookupResult();
+    }
+
+    function renderLookupResult(person) {
+      lookupNombreEl.textContent = person.nombre || "-";
+      lookupDocumentoEl.textContent = person.documento || "-";
+      lookupTipoDocEl.textContent = person.tipoDoc || "-";
+      lookupAniosEl.textContent = person.anios || "-";
+      lookupDireccionEl.textContent = person.direccion || "-";
+      lookupNivelEducativoEl.textContent = person.nivelEducativo || "-";
+      lookupGrupoPoblacionalEl.textContent = person.grupoPoblacional || "-";
+      lookupEmailEl.textContent = person.email || "-";
+      lookupSourceEl.textContent = person.source || "Base en línea";
+      lookupResultEl.hidden = false;
+    }
+
+    function clearLookupResult() {
+      lookupNombreEl.textContent = "-";
+      lookupDocumentoEl.textContent = "-";
+      lookupTipoDocEl.textContent = "-";
+      lookupAniosEl.textContent = "-";
+      lookupDireccionEl.textContent = "-";
+      lookupNivelEducativoEl.textContent = "-";
+      lookupGrupoPoblacionalEl.textContent = "-";
+      lookupEmailEl.textContent = "-";
+      lookupSourceEl.textContent = "-";
+      lookupResultEl.hidden = true;
+    }
+
+    function renderPreview(cert) {
+      const certDate = toValidDate(cert.fechaISO);
+      const fecha = certDate.toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" });
+      const day = certDate.toLocaleDateString("es-CO", { day: "2-digit" });
+      const month = capitalizeFirst(certDate.toLocaleDateString("es-CO", { month: "long" }));
+      const year = certDate.toLocaleDateString("es-CO", { year: "numeric" });
+      const nivelEducativoText = cert.nivelEducativo
+        ? escapeHtml(cert.nivelEducativo)
+        : "No reportado";
+      const emailText = cert.email
+        ? escapeHtml(cert.email)
+        : "No reportado";
+      previewEl.innerHTML =
+        "<div class='cert-header'>" +
+        "<p class='cert-title'>JUNTA DE ACCION COMUNAL VEREDA LA GARRAPATA</p>" +
+        "<p class='cert-subline'>ID: 1682 NIT: 800243416-5 CAUCASIA - ANTIOQUIA</p>" +
+        "<p class='cert-subline'>DEPARTAMENTO ADMINISTRATIVO - SECRETARIADO</p>" +
+        "<p class='cert-ruc'>RUC: 1-4884-40638</p>" +
+        "</div>" +
+        "<div class='cert-body'>" +
+        "<p>Que mediante Resolución número 255 del 26/11/1991 expedida por la Gobernación de Antioquia se reconoció personería jurídica a: <strong>JUNTA DE ACCION COMUNAL VEREDA LA GARRAPATA</strong> del municipio de <strong>CAUCASIA (ANT.)</strong>, la cual se encuentra <strong>VIGENTE</strong> a la fecha.</p>" +
+        "<p class='cert-center'><strong>Certifica que:</strong></p>" +
+        "<p>El Señor(a) <strong>" + escapeHtml(cert.nombre) + "</strong>, identificado(a) con <strong>" + escapeHtml(cert.tipoDoc) + " " + escapeHtml(cert.documento) + "</strong>, actualmente reside en <strong>" + escapeHtml(cert.direccion) + "</strong>, municipio de Caucasia Antioquia, donde tiene una permanencia superior a <strong>" + escapeHtml(cert.anios) + " años</strong>.</p>" +
+        "<p><strong>Nivel educativo:</strong> " + nivelEducativoText + ". <strong>Correo electrónico:</strong> " + emailText + ".</p>" +
+        "<p>Este certificado se emite bajo los lineamientos y cumplimiento de los estatutos y reglamentos internos de esta organización. Motivo de emisión: <strong>" + escapeHtml(cert.motivo) + "</strong>.</p>" +
+        (cert.observaciones ? "<p>Observaciones: " + escapeHtml(cert.observaciones) + ".</p>" : "") +
+        "<p>Se expide a solicitud del interesado a los <strong>" + escapeHtml(day) + "</strong> días del mes de <strong>" + escapeHtml(month) + "</strong> del <strong>" + escapeHtml(year) + "</strong>, en la ciudad de Caucasia, Vereda La Garrapata.</p>" +
+        "<div class='cert-signature'>" +
+        "<div class='cert-sign-line'></div>" +
+        "<strong>" + escapeHtml(SIGNER_NAME) + "</strong><br>" + escapeHtml(SIGNER_ID) + "<br>" + escapeHtml(SIGNER_ROLE) +
+        "</div>" +
+        "</div>" +
+        "<div class='preview-meta'>" +
+        "<span>Consecutivo: " + escapeHtml(cert.consecutivo) + "</span>" +
+        "<span>Código de verificación: " + escapeHtml(cert.codigo) + "</span>" +
+        "<span>Fecha: " + escapeHtml(capitalizeFirst(fecha)) + "</span>" +
+        "</div>";
+    }
+
+    async function apiCreate(payload) {
+      const body = new URLSearchParams();
+      body.set("action", "create");
+      body.set("payload", JSON.stringify(payload));
+      const json = await apiRequest("POST", body);
+      return json.data;
+    }
+
+    async function apiFind(params) {
+      const query = { action: "find" };
+      if (params.codigo) query.codigo = params.codigo;
+      if (params.documento) query.documento = params.documento;
+      const json = await apiRequest("GET", query);
+      return json.data || null;
+    }
+
+    async function apiFindPerson(documento) {
+      try {
+        const json = await apiRequest("GET", {
+          action: "find_person",
+          documento: documento
+        });
+        return json.data || null;
+      } catch (error) {
+        const message = String(error && error.message ? error.message : error);
+        if (message.indexOf("Acción no soportada: find_person") === -1 &&
+            message.indexOf("Accion no soportada: find_person") === -1) {
+          throw error;
+        }
+        const cert = await apiFind({ documento: documento });
+        if (!cert) return null;
+        return {
+          documento: cert.documento,
+          nombre: cert.nombre,
+          tipoDoc: cert.tipoDoc || "CC",
+          anios: cert.anios,
+          direccion: cert.direccion,
+          nivelEducativo: cert.nivelEducativo,
+          grupoPoblacional: cert.grupoPoblacional,
+          email: cert.email,
+          motivo: cert.motivo,
+          firmante: cert.firmante,
+          cargoFirmante: cert.cargoFirmante,
+          observaciones: cert.observaciones,
+          source: "Certificados"
+        };
+      }
+    }
+
+    async function apiRequest(method, params) {
+      if (!isApiConfigured()) {
+        throw new Error("Falta configurar API_URL.");
+      }
+
+      let response;
+      if (method === "GET") {
+        const url = new URL(API_URL);
+        Object.keys(params || {}).forEach(function (key) {
+          const value = params[key];
+          if (value !== undefined && value !== null && value !== "") {
+            url.searchParams.set(key, value);
+          }
+        });
+        response = await fetch(url.toString(), { method: "GET" });
+      } else {
+        response = await fetch(API_URL, {
+          method: "POST",
+          body: params
+        });
+      }
+
+      let json;
+      try {
+        json = await response.json();
+      } catch (_error) {
+        throw new Error("Respuesta inválida del servidor de Apps Script.");
+      }
+
+      if (!json.ok) {
+        throw new Error(json.error || "Error al consultar la API.");
+      }
+      return json;
+    }
+
+    function isApiConfigured() {
+      return API_URL && API_URL.indexOf("https://script.google.com/") === 0;
+    }
+
+    function toggleBusy(isBusy) {
+      submitBtn.disabled = isBusy;
+      submitBtn.textContent = isBusy ? "Guardando..." : "Generar certificado";
+    }
+
+    function read(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString("es-CO", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+    }
+
+    function toValidDate(value) {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) {
+        return new Date();
+      }
+      return date;
+    }
+
+    function capitalizeFirst(value) {
+      const text = String(value || "");
+      if (!text) return "";
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    function setStatus(message, isError) {
+      statusEl.textContent = message || "";
+      statusEl.className = isError ? "status error" : "status";
+    }
+
+    function setVerifyStatus(message, isError) {
+      verifyStatusEl.textContent = message || "";
+      verifyStatusEl.className = isError ? "status error" : "status";
+    }
+
+    function setLookupStatus(message, isError) {
+      lookupStatusEl.textContent = message || "";
+      lookupStatusEl.className = isError ? "status error" : "status";
+    }
+
+    function hasFormContent() {
+      const ids = ["documento", "nombre", "anios", "direccion", "motivo", "observaciones"];
+      return ids.some(function (id) {
+        return read(id);
+      });
+    }
+
+    function askConfirmation(title, message, confirmLabel) {
+      return new Promise(function (resolve) {
+        confirmResolver = resolve;
+        confirmTitleEl.textContent = title || "Confirmar acción";
+        confirmMessageEl.textContent = message || "¿Deseas continuar?";
+        confirmAcceptBtn.textContent = confirmLabel || "Confirmar";
+        confirmOverlayEl.hidden = false;
+        confirmAcceptBtn.focus();
+      });
+    }
+
+    function resolveConfirmation(accepted) {
+      if (!confirmResolver) return;
+      const resolver = confirmResolver;
+      confirmResolver = null;
+      confirmOverlayEl.hidden = true;
+      resolver(Boolean(accepted));
+    }
+
+    function showToast(message, type) {
+      const text = String(message || "").trim();
+      if (!text) return;
+      const toast = document.createElement("div");
+      const tone = type === "error" || type === "success" ? type : "info";
+      toast.className = "toast " + tone;
+      toast.textContent = text;
+      toastWrapEl.appendChild(toast);
+      requestAnimationFrame(function () {
+        toast.classList.add("show");
+      });
+      setTimeout(function () {
+        toast.classList.remove("show");
+        setTimeout(function () {
+          toast.remove();
+        }, 220);
+      }, 3400);
+    }
+
+    function normalizeDoc(value) {
+      return String(value || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+    }
+
+    function sameDocument(a, b) {
+      return normalizeDoc(a) && normalizeDoc(a) === normalizeDoc(b);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+  </script>
+</body>
+</html>

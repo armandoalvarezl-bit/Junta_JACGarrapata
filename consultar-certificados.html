@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Certificados | Vereda La Garrapata</title>
+  <link rel="icon" type="image/png" href="imagenes/logo-jac-transparente.png">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;700;800&display=swap");
+
+    :root {
+      --ink: #122842;
+      --muted: #4e6075;
+      --bg: #f8f3e7;
+      --paper: #fffdf7;
+      --line: #d9ccb1;
+      --primary: #1a2f79;
+      --primary-2: #27539d;
+      --accent: #ac7424;
+      --ok: #2f7a47;
+      --err: #b14545;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(26, 47, 121, 0.24), transparent 40%),
+        radial-gradient(circle at 96% 18%, rgba(172, 116, 36, 0.24), transparent 36%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1040px, 92%);
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(248, 243, 231, 0.92);
+      border-bottom: 1px solid rgba(217, 204, 177, 0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid rgba(26, 47, 121, 0.2);
+      box-shadow: 0 10px 22px rgba(18, 40, 66, 0.2);
+      display: block;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .brand strong {
+      display: block;
+      line-height: 1.2;
+      font-size: 0.98rem;
+    }
+
+    .brand span {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .nav {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 800;
+      font-size: 0.86rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 150ms ease, filter 150ms ease;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(0.98);
+    }
+
+    .btn-primary {
+      background: linear-gradient(140deg, var(--primary), var(--primary-2));
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(26, 47, 121, 0.3);
+    }
+
+    .btn-soft {
+      background: #eee0c5;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .main {
+      padding: 24px 0 34px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero {
+      background: linear-gradient(140deg, #fffcf5, #f4e7ce);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.65rem, 3vw, 2.28rem);
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 68ch;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 920px) {
+      .layout {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(20, 35, 67, 0.1);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+
+    .finder {
+      display: grid;
+      gap: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    input {
+      font: inherit;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      padding: 10px 11px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .actions[hidden] {
+      display: none !important;
+    }
+
+    .status {
+      margin: 0;
+      min-height: 18px;
+      color: var(--ok);
+      font-size: 0.9rem;
+    }
+
+    .status.error {
+      color: var(--err);
+    }
+
+    .toast-wrap {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2000;
+      display: grid;
+      gap: 8px;
+      width: min(340px, calc(100vw - 24px));
+    }
+
+    .toast {
+      background: #1d2f5f;
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background: #2b6e44;
+    }
+
+    .toast.error {
+      background: #8f3636;
+    }
+
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2100;
+      background: rgba(18, 34, 70, 0.5);
+      display: grid;
+      place-items: center;
+      padding: 12px;
+    }
+
+    .confirm-overlay[hidden] {
+      display: none !important;
+    }
+
+    .confirm-box {
+      width: min(440px, 100%);
+      background: #fff9ef;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+      display: grid;
+      gap: 10px;
+    }
+
+    .confirm-box h3 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .confirm-box p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.92rem;
+    }
+
+    .confirm-actions {
+      display: flex;
+      justify-content: end;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .result {
+      border: 2px solid #c4a05f;
+      border-radius: 13px;
+      padding: 15px;
+      background: linear-gradient(180deg, #fffef9, #fff);
+      min-height: 220px;
+    }
+
+    .result h3 {
+      margin: 0 0 10px;
+      text-align: center;
+      letter-spacing: 0.03em;
+      color: var(--primary);
+      font-size: 1.04rem;
+    }
+
+    .result p {
+      margin: 8px 0;
+      line-height: 1.58;
+      color: var(--ink);
+    }
+
+    .result-meta {
+      margin-top: 9px;
+      display: grid;
+      gap: 4px;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .history-wrap {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      overflow: auto;
+      max-height: 320px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid #e4d8c2;
+      font-size: 0.86rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #efe0c3;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    footer {
+      margin-top: 12px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.88rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <img src="imagenes/logo-jac-transparente.png" alt="" loading="eager" decoding="async">
+        </div>
+        <div>
+          <strong>Consulta de certificados</strong>
+          <span>Vereda La Garrapata</span>
+        </div>
+      </div>
+      <div class="nav">
+        <a class="btn btn-soft" href="home.html">Volver al home</a>
+        <a class="btn btn-primary" href="emitir-certificados.html">Emitir certificado</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main">
+    <section class="hero">
+      <h1>Validación pública de certificados</h1>
+      <p>
+        Este módulo confirma la autenticidad de certificados emitidos por la organización comunitaria.
+        La consulta pública se realiza únicamente con código de verificación.
+      </p>
+    </section>
+
+    <section class="layout">
+      <article class="card">
+        <h2>Buscar certificado</h2>
+        <div class="finder">
+          <div class="grid">
+            <label>Código de verificación o cédula
+              <input id="codigoInput" placeholder="Ej: GAR-AB12CD o 123456789">
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" type="button" id="buscarBtn">Consultar</button>
+            <button class="btn btn-soft" type="button" id="limpiarBtn">Limpiar</button>
+          </div>
+          <p id="status" class="status"></p>
+          <p class="hint">
+            Puedes consultar por código o cédula y descargar el certificado encontrado.
+          </p>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Resultado de verificación</h2>
+        <section class="result" id="resultado">
+          <h3>ESTADO DEL CERTIFICADO</h3>
+          <p>Ingresa un código o cédula para consultar.</p>
+          <div class="result-meta">
+            <span>Consecutivo: -</span>
+            <span>Código: -</span>
+            <span>Fecha: -</span>
+          </div>
+        </section>
+        <div class="actions" id="resultActions" style="margin-top: 10px;" hidden>
+          <button class="btn btn-primary" type="button" id="descargarBtn">Descargar certificado</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="card">
+      <h2>Últimos certificados registrados</h2>
+      <div class="history-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Consecutivo</th>
+              <th>Código</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="historialBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <span>Organización Comunitaria Vereda La Garrapata | Consulta pública</span>
+      <span id="yearLabel"></span>
+    </footer>
+  </main>
+
+  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+  <div id="confirmOverlay" class="confirm-overlay" hidden>
+    <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+      <h3 id="confirmTitle">Confirmar acción</h3>
+      <p id="confirmMessage">¿Deseas continuar?</p>
+      <div class="confirm-actions">
+        <button id="confirmCancelBtn" class="btn btn-soft" type="button">Cancelar</button>
+        <button id="confirmAcceptBtn" class="btn btn-primary" type="button">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="consultar-certificados.js"></script>
+
+
+</body>
+</html>
