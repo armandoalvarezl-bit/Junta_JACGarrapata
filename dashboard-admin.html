@@ -463,10 +463,11 @@
                   <th>Nombre</th>
                   <th>Documento</th>
                   <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="certTableBody">
-                <tr><td colspan="6">Sin datos.</td></tr>
+                <tr><td colspan="7">Sin datos.</td></tr>
               </tbody>
             </table>
           </div>
@@ -603,6 +604,15 @@
             Correo
             <input id="fEmail" type="email" placeholder="correo@dominio.com">
           </label>
+          <label id="editEstadoWrap" hidden>
+            Estado
+            <select id="fEstado">
+              <option value="ACTIVO">ACTIVO</option>
+              <option value="INACTIVO">INACTIVO</option>
+              <option value="VALIDACION">VALIDACION</option>
+              <option value="ELIMINADO">ELIMINADO</option>
+            </select>
+          </label>
         </div>
         <label style="margin-top: 8px;">
           Motivo
@@ -615,6 +625,8 @@
         <div class="actions">
           <button id="lookupResidentBtn" class="btn btn-soft" type="button">Cargar afiliado por cedula</button>
           <button id="createCertBtn" class="btn btn-primary" type="button">Generar certificado</button>
+          <button id="updateCertBtn" class="btn btn-primary" type="button" hidden>Guardar cambios</button>
+          <button id="cancelEditBtn" class="btn btn-soft" type="button" hidden>Cancelar edicion</button>
           <button id="clearAdminFormBtn" class="btn btn-soft" type="button">Limpiar</button>
         </div>
         <p id="createStatus" class="status"></p>
@@ -626,7 +638,7 @@
   <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycby0aPuuwsRAFWZ0YliSexCwcZZPpMvWCO2CfBpNdDEWmMG5Vv-F28ChSVHNaKte2IV7/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzoYR31at-OKkn9Qicw7n1cFclkzNXQYWid8V0gAe-0jy4b_5yxGT-bGFZDRLSP5e4v/exec";
     const ADMIN_CODE = "JAC-ADMIN-2026";
 
     const accessCardEl = document.getElementById("accessCard");
@@ -647,9 +659,13 @@
     const createStatusEl = document.getElementById("createStatus");
     const lastCreatedEl = document.getElementById("lastCreated");
     const toastWrapEl = document.getElementById("toastWrap");
+    const updateCertBtnEl = document.getElementById("updateCertBtn");
+    const cancelEditBtnEl = document.getElementById("cancelEditBtn");
+    const editEstadoWrapEl = document.getElementById("editEstadoWrap");
 
     let certificates = [];
     let residents = [];
+    let editingCert = null;
 
     init();
 
@@ -660,10 +676,13 @@
     document.getElementById("clearResidentFormBtn").addEventListener("click", clearResidentRegistrationForm);
     document.getElementById("lookupResidentBtn").addEventListener("click", lookupResidentByDoc);
     document.getElementById("createCertBtn").addEventListener("click", createCertificateFromAdmin);
+    updateCertBtnEl.addEventListener("click", saveCertificateEdits);
+    cancelEditBtnEl.addEventListener("click", exitEditMode);
     document.getElementById("clearAdminFormBtn").addEventListener("click", clearAdminForm);
     logoutBtnEl.addEventListener("click", logoutDashboard);
     certSearchInputEl.addEventListener("input", renderCertificates);
     residentSearchInputEl.addEventListener("input", renderResidents);
+    certTableBodyEl.addEventListener("click", handleCertTableAction);
     accessCodeInputEl.addEventListener("keydown", function (event) {
       if (event.key === "Enter") {
         unlockDashboard();
@@ -856,11 +875,12 @@
       });
 
       if (!filtered.length) {
-        certTableBodyEl.innerHTML = "<tr><td colspan='6'>No hay certificados para mostrar.</td></tr>";
+        certTableBodyEl.innerHTML = "<tr><td colspan='7'>No hay certificados para mostrar.</td></tr>";
         return;
       }
 
       certTableBodyEl.innerHTML = filtered.map(function (cert) {
+        const estado = cert.estado || "ACTIVO";
         return (
           "<tr>" +
           "<td>" + escapeHtml(cert.consecutivo || "-") + "</td>" +
@@ -868,7 +888,13 @@
           "<td>" + escapeHtml(formatDate(cert.fechaISO)) + "</td>" +
           "<td>" + escapeHtml(cert.nombre || "-") + "</td>" +
           "<td>" + escapeHtml((cert.tipoDoc || "") + " " + (cert.documento || "-")) + "</td>" +
-          "<td>" + escapeHtml(cert.estado || "ACTIVO") + "</td>" +
+          "<td>" + escapeHtml(estado) + "</td>" +
+          "<td>" +
+            "<button class='btn btn-soft' type='button' data-action='edit' data-codigo='" + escapeHtml(cert.codigo || "") + "' data-consecutivo='" + escapeHtml(cert.consecutivo || "") + "'>Editar</button> " +
+            "<button class='btn btn-soft' type='button' data-action='status' data-estado='INACTIVO' data-codigo='" + escapeHtml(cert.codigo || "") + "' data-consecutivo='" + escapeHtml(cert.consecutivo || "") + "'>Inactivar</button> " +
+            "<button class='btn btn-soft' type='button' data-action='status' data-estado='VALIDACION' data-codigo='" + escapeHtml(cert.codigo || "") + "' data-consecutivo='" + escapeHtml(cert.consecutivo || "") + "'>Validacion</button> " +
+            "<button class='btn btn-danger' type='button' data-action='delete' data-codigo='" + escapeHtml(cert.codigo || "") + "' data-consecutivo='" + escapeHtml(cert.consecutivo || "") + "'>Eliminar</button>" +
+          "</td>" +
           "</tr>"
         );
       }).join("");
@@ -985,6 +1011,148 @@
       }
     }
 
+    function handleCertTableAction(event) {
+      const btn = event.target.closest("button[data-action]");
+      if (!btn) return;
+      const action = btn.dataset.action;
+      const codigo = btn.dataset.codigo || "";
+      const consecutivo = btn.dataset.consecutivo || "";
+      const cert = certificates.find(function (item) {
+        return (codigo && item.codigo === codigo) || (consecutivo && item.consecutivo === consecutivo);
+      }) || null;
+
+      if (action === "edit") {
+        if (!cert) {
+          showToast("No se encontro el certificado para editar.", "error");
+          return;
+        }
+        enterEditMode(cert);
+        return;
+      }
+
+      if (action === "status") {
+        const estado = (btn.dataset.estado || "").toUpperCase();
+        updateCertificateStatus(codigo, consecutivo, estado);
+        return;
+      }
+
+      if (action === "delete") {
+        deleteCertificate(codigo, consecutivo);
+      }
+    }
+
+    function enterEditMode(cert) {
+      editingCert = cert;
+      set("fDocumento", cert.documento || "");
+      set("fNombre", cert.nombre || "");
+      set("fTipoDoc", cert.tipoDoc || "CC");
+      set("fAnios", cert.anios || "");
+      set("fDireccion", cert.direccion || "");
+      set("fNivelEducativo", cert.nivelEducativo || "");
+      set("fGrupoPoblacional", cert.grupoPoblacional || "");
+      set("fEmail", cert.email || "");
+      set("fMotivo", cert.motivo || "");
+      set("fObservaciones", cert.observaciones || "");
+      set("fEstado", (cert.estado || "ACTIVO"));
+      editEstadoWrapEl.hidden = false;
+      updateCertBtnEl.hidden = false;
+      cancelEditBtnEl.hidden = false;
+      showToast("Edicion habilitada para " + (cert.consecutivo || cert.codigo || ""), "info");
+    }
+
+    function exitEditMode() {
+      editingCert = null;
+      editEstadoWrapEl.hidden = true;
+      updateCertBtnEl.hidden = true;
+      cancelEditBtnEl.hidden = true;
+      clearAdminForm();
+    }
+
+    async function saveCertificateEdits() {
+      if (!editingCert) {
+        setCreateStatus("No hay certificado en edicion.", true);
+        return;
+      }
+      const payload = {
+        codigo: editingCert.codigo || "",
+        consecutivo: editingCert.consecutivo || "",
+        nombre: read("fNombre"),
+        tipoDoc: read("fTipoDoc") || "CC",
+        documento: read("fDocumento"),
+        anios: read("fAnios"),
+        direccion: read("fDireccion"),
+        nivelEducativo: read("fNivelEducativo"),
+        grupoPoblacional: read("fGrupoPoblacional"),
+        email: read("fEmail"),
+        motivo: read("fMotivo"),
+        observaciones: read("fObservaciones"),
+        estado: read("fEstado") || "ACTIVO"
+      };
+
+      const accepted = window.confirm("Se actualizaran los datos del certificado. Deseas continuar?");
+      if (!accepted) {
+        showToast("Edicion cancelada.", "warn");
+        return;
+      }
+
+      try {
+        setCreateStatus("Actualizando certificado...");
+        const body = new URLSearchParams();
+        body.set("action", "update");
+        body.set("payload", JSON.stringify(payload));
+        await apiRequest("POST", body);
+        setCreateStatus("Certificado actualizado correctamente.");
+        showToast("Certificado actualizado.", "success");
+        await loadCertificates();
+        exitEditMode();
+      } catch (error) {
+        setCreateStatus(error.message || "No se pudo actualizar el certificado.", true);
+        showToast(error.message || "No se pudo actualizar el certificado.", "error");
+      }
+    }
+
+    async function updateCertificateStatus(codigo, consecutivo, estado) {
+      const accepted = window.confirm("Se cambiara el estado a " + estado + ". Deseas continuar?");
+      if (!accepted) {
+        showToast("Cambio de estado cancelado.", "warn");
+        return;
+      }
+      try {
+        setCreateStatus("Actualizando estado...");
+        const body = new URLSearchParams();
+        body.set("action", "set_status");
+        body.set("payload", JSON.stringify({ codigo: codigo, consecutivo: consecutivo, estado: estado }));
+        await apiRequest("POST", body);
+        setCreateStatus("Estado actualizado a " + estado + ".");
+        showToast("Estado actualizado.", "success");
+        await loadCertificates();
+      } catch (error) {
+        setCreateStatus(error.message || "No se pudo actualizar el estado.", true);
+        showToast(error.message || "No se pudo actualizar el estado.", "error");
+      }
+    }
+
+    async function deleteCertificate(codigo, consecutivo) {
+      const accepted = window.confirm("Se marcara el certificado como ELIMINADO. Deseas continuar?");
+      if (!accepted) {
+        showToast("Eliminacion cancelada.", "warn");
+        return;
+      }
+      try {
+        setCreateStatus("Marcando certificado como eliminado...");
+        const body = new URLSearchParams();
+        body.set("action", "delete");
+        body.set("payload", JSON.stringify({ codigo: codigo, consecutivo: consecutivo }));
+        await apiRequest("POST", body);
+        setCreateStatus("Certificado marcado como ELIMINADO.");
+        showToast("Certificado eliminado.", "success");
+        await loadCertificates();
+      } catch (error) {
+        setCreateStatus(error.message || "No se pudo eliminar el certificado.", true);
+        showToast(error.message || "No se pudo eliminar el certificado.", "error");
+      }
+    }
+
     function fillFormFromPerson(person) {
       set("fDocumento", person.documento || "");
       set("fNombre", person.nombre || "");
@@ -1008,6 +1176,13 @@
       set("fEmail", "");
       set("fMotivo", "");
       set("fObservaciones", "");
+      set("fEstado", "ACTIVO");
+      if (editingCert) {
+        editingCert = null;
+        editEstadoWrapEl.hidden = true;
+        updateCertBtnEl.hidden = true;
+        cancelEditBtnEl.hidden = true;
+      }
       setCreateStatus("");
       lastCreatedEl.textContent = "";
     }

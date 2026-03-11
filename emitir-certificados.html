@@ -605,7 +605,7 @@
               <input id="documento" required>
             </label>
             <label>Años de residencia
-              <input id="anios" type="number" min="0" required readonly>
+              <input id="anios" type="number" min="0" required>
             </label>
             <label>Dirección o sector
               <input id="direccion" required readonly>
@@ -705,7 +705,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycby0aPuuwsRAFWZ0YliSexCwcZZPpMvWCO2CfBpNdDEWmMG5Vv-F28ChSVHNaKte2IV7/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzoYR31at-OKkn9Qicw7n1cFclkzNXQYWid8V0gAe-0jy4b_5yxGT-bGFZDRLSP5e4v/exec";
     const SIGNER_NAME = "Jorge Pelferto Hernandez";
     const SIGNER_ID = "CC:98651838";
     const SIGNER_ROLE = "Presidente Junta";
@@ -963,7 +963,11 @@
       } else {
         document.getElementById("tipoDoc").value = "CC";
       }
-      document.getElementById("anios").value = person.anios || "";
+      const aniosEl = document.getElementById("anios");
+      const manualAnios = String(aniosEl.value || "").trim();
+      if (!manualAnios) {
+        aniosEl.value = person.anios || "";
+      }
       document.getElementById("direccion").value = person.direccion || "";
       document.getElementById("nivelEducativo").value = person.nivelEducativo || "";
       document.getElementById("grupoPoblacional").value = person.grupoPoblacional || "";

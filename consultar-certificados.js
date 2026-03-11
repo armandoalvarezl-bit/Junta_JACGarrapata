@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycby0aPuuwsRAFWZ0YliSexCwcZZPpMvWCO2CfBpNdDEWmMG5Vv-F28ChSVHNaKte2IV7/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzoYR31at-OKkn9Qicw7n1cFclkzNXQYWid8V0gAe-0jy4b_5yxGT-bGFZDRLSP5e4v/exec";
 const SIGNER_NAME = "Jorge Pelferto Hernandez";
 const SIGNER_ID = "CC:98651838";
 const SIGNER_ROLE = "Presidente Junta";
@@ -129,17 +129,23 @@ const SIGNER_ROLE = "Presidente Junta";
 
     function renderResult(cert) {
       const fecha = formatDate(cert.fechaISO);
+      const estado = String(cert.estado || "ACTIVO").toUpperCase();
+      const valido = estado === "ACTIVO";
       resultadoEl.innerHTML =
-        "<h3>ESTADO DEL CERTIFICADO: VALIDO</h3>" +
-        "<p>El certificado consultado se encuentra registrado en la base oficial de la organizacion.</p>" +
-        "<p>Para obtener el documento, usa el boton de descarga.</p>" +
+        "<h3>ESTADO DEL CERTIFICADO: " + escapeHtml(valido ? "VALIDO" : estado) + "</h3>" +
+        "<p>" +
+          (valido
+            ? "El certificado consultado se encuentra registrado en la base oficial de la organizacion."
+            : "El certificado consultado se encuentra " + escapeHtml(estado) + " y no es valido para tramites.") +
+        "</p>" +
+        "<p>" + (valido ? "Para obtener el documento, usa el boton de descarga." : "Si tienes dudas, consulta con la Junta.") + "</p>" +
         "<div class='result-meta'>" +
         "<span>Consecutivo: " + escapeHtml(cert.consecutivo) + "</span>" +
         "<span>Codigo: " + escapeHtml(cert.codigo) + "</span>" +
         "<span>Fecha: " + escapeHtml(fecha) + "</span>" +
-        "<span>Estado: Registrado</span>" +
+        "<span>Estado: " + escapeHtml(estado) + "</span>" +
         "</div>";
-      resultActionsEl.hidden = false;
+      resultActionsEl.hidden = !valido;
     }
 
     function resetResult() {
@@ -162,12 +168,13 @@ const SIGNER_ROLE = "Presidente Junta";
       }
 
       historialBody.innerHTML = certificados.map(function (cert) {
+        const estado = String(cert.estado || "ACTIVO").toUpperCase();
         return (
           "<tr>" +
           "<td>" + escapeHtml(cert.consecutivo) + "</td>" +
           "<td>" + escapeHtml(cert.codigo) + "</td>" +
           "<td>" + escapeHtml(formatDate(cert.fechaISO)) + "</td>" +
-          "<td>Registrado</td>" +
+          "<td>" + escapeHtml(estado) + "</td>" +
           "</tr>"
         );
       }).join("");
@@ -190,6 +197,12 @@ const SIGNER_ROLE = "Presidente Junta";
       if (!certificadoActual) {
         setStatus("Primero consulta un certificado para descargar.", true);
         showToast("Primero consulta un certificado para descargar.", "error");
+        return;
+      }
+      const estado = String(certificadoActual.estado || "ACTIVO").toUpperCase();
+      if (estado !== "ACTIVO") {
+        setStatus("El certificado esta " + estado + " y no se puede descargar.", true);
+        showToast("El certificado no esta activo.", "error");
         return;
       }
       const password = normalizeDoc(certificadoActual.documento);
