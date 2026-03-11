@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzi3IGrfQ7OvaWFyz3mZ8wTRZlapjG2k6lxZF0AdPD0EgNTGqlONbSvWlcT0jUJwYhC/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzsHcFlTYbxpnTc62KUd0OqhZli36K1KQKpgsR0AR4xmh1ZL42_at9k7v-S-OQ5ZXux/exec";
 const SIGNER_NAME = "Jorge Pelferto Hernandez";
 const SIGNER_ID = "CC:98651838";
 const SIGNER_ROLE = "Presidente Junta";
