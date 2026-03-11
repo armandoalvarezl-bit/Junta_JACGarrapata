@@ -379,6 +379,7 @@
       min-height: 520px;
       font-family: "Times New Roman", serif;
       color: #000;
+      user-select: none;
     }
 
     .cert-header {
@@ -705,7 +706,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzoYR31at-OKkn9Qicw7n1cFclkzNXQYWid8V0gAe-0jy4b_5yxGT-bGFZDRLSP5e4v/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzi3IGrfQ7OvaWFyz3mZ8wTRZlapjG2k6lxZF0AdPD0EgNTGqlONbSvWlcT0jUJwYhC/exec";
     const SIGNER_NAME = "Jorge Pelferto Hernandez";
     const SIGNER_ID = "CC:98651838";
     const SIGNER_ROLE = "Presidente Junta";
@@ -797,9 +798,19 @@
       setLookupStatus("");
       clearLookupResult();
     });
-    document.getElementById("printBtn").addEventListener("click", function () {
+    document.getElementById("printBtn").addEventListener("click", async function () {
       if (!ultimoCertificado) {
         setStatus("Primero genera o consulta un certificado.", true);
+        return;
+      }
+      const estado = String(ultimoCertificado.estado || "ACTIVO").toUpperCase();
+      if (estado !== "ACTIVO") {
+        setStatus("No se puede descargar/imprimir: el certificado esta en " + estado + ".", true);
+        await showAlert(
+          "No se puede descargar/imprimir",
+          "El certificado esta en " + estado + " y solo podra imprimirse cuando sea aprobado por el administrador.",
+          "Entendido"
+        );
         return;
       }
       window.print();
@@ -871,8 +882,14 @@
         const cert = await apiCreate(payload);
         ultimoCertificado = cert;
         renderPreview(cert);
-        setStatus("Certificado generado y guardado en Google Sheets.");
-        showToast("Certificado generado correctamente.", "success");
+        const estado = String(cert.estado || "ACTIVO").toUpperCase();
+        if (estado === "ACTIVO") {
+          setStatus("Certificado generado y guardado en Google Sheets.");
+          showToast("Certificado generado correctamente.", "success");
+        } else {
+          setStatus("Certificado generado en estado " + estado + ". No se puede imprimir hasta aprobacion.", true);
+          showToast("Certificado en validacion.", "warn");
+        }
         verifyStatusEl.textContent = "";
         verifyStatusEl.className = "status";
         document.getElementById("codigoBusqueda").value = cert.codigo;
@@ -1199,6 +1216,19 @@
         confirmTitleEl.textContent = title || "Confirmar acción";
         confirmMessageEl.textContent = message || "¿Deseas continuar?";
         confirmAcceptBtn.textContent = confirmLabel || "Confirmar";
+        confirmCancelBtn.hidden = false;
+        confirmOverlayEl.hidden = false;
+        confirmAcceptBtn.focus();
+      });
+    }
+
+    function showAlert(title, message, acceptLabel) {
+      return new Promise(function (resolve) {
+        confirmResolver = resolve;
+        confirmTitleEl.textContent = title || "Atencion";
+        confirmMessageEl.textContent = message || "";
+        confirmAcceptBtn.textContent = acceptLabel || "Aceptar";
+        confirmCancelBtn.hidden = true;
         confirmOverlayEl.hidden = false;
         confirmAcceptBtn.focus();
       });
@@ -1208,6 +1238,7 @@
       if (!confirmResolver) return;
       const resolver = confirmResolver;
       confirmResolver = null;
+      confirmCancelBtn.hidden = false;
       confirmOverlayEl.hidden = true;
       resolver(Boolean(accepted));
     }

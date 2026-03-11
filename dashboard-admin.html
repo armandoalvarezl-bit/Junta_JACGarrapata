@@ -376,6 +376,44 @@
     .toast.error { background: #8f3636; }
     .toast.warn { background: #8f5d11; }
 
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 24, 42, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 2100;
+    }
+
+    .confirm-box {
+      width: min(420px, 94vw);
+      background: #fffdf7;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 18px 34px rgba(16, 24, 42, 0.24);
+    }
+
+    .confirm-box h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+    }
+
+    .confirm-box p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -618,6 +656,10 @@
           Motivo
           <textarea id="fMotivo" placeholder="Motivo de emision"></textarea>
         </label>
+        <label id="editEstadoObsWrap" style="margin-top: 8px;" hidden>
+          Observaciones de estado
+          <textarea id="fEstadoObs" placeholder="Explica por que esta INACTIVO o en VALIDACION"></textarea>
+        </label>
         <label style="margin-top: 8px;">
           Observaciones
           <textarea id="fObservaciones" placeholder="Observaciones adicionales"></textarea>
@@ -636,9 +678,19 @@
   </main>
 
   <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+  <div id="confirmOverlay" class="confirm-overlay" hidden>
+    <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+      <h3 id="confirmTitle">Confirmar accion</h3>
+      <p id="confirmMessage">¿Deseas continuar?</p>
+      <div class="confirm-actions">
+        <button id="confirmCancelBtn" class="btn btn-soft" type="button">Cancelar</button>
+        <button id="confirmAcceptBtn" class="btn btn-primary" type="button">Confirmar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzoYR31at-OKkn9Qicw7n1cFclkzNXQYWid8V0gAe-0jy4b_5yxGT-bGFZDRLSP5e4v/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzi3IGrfQ7OvaWFyz3mZ8wTRZlapjG2k6lxZF0AdPD0EgNTGqlONbSvWlcT0jUJwYhC/exec";
     const ADMIN_CODE = "JAC-ADMIN-2026";
 
     const accessCardEl = document.getElementById("accessCard");
@@ -659,13 +711,20 @@
     const createStatusEl = document.getElementById("createStatus");
     const lastCreatedEl = document.getElementById("lastCreated");
     const toastWrapEl = document.getElementById("toastWrap");
+    const confirmOverlayEl = document.getElementById("confirmOverlay");
+    const confirmTitleEl = document.getElementById("confirmTitle");
+    const confirmMessageEl = document.getElementById("confirmMessage");
+    const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+    const confirmAcceptBtn = document.getElementById("confirmAcceptBtn");
     const updateCertBtnEl = document.getElementById("updateCertBtn");
     const cancelEditBtnEl = document.getElementById("cancelEditBtn");
     const editEstadoWrapEl = document.getElementById("editEstadoWrap");
+    const editEstadoObsWrapEl = document.getElementById("editEstadoObsWrap");
 
     let certificates = [];
     let residents = [];
     let editingCert = null;
+    let confirmResolver = null;
 
     init();
 
@@ -683,6 +742,22 @@
     certSearchInputEl.addEventListener("input", renderCertificates);
     residentSearchInputEl.addEventListener("input", renderResidents);
     certTableBodyEl.addEventListener("click", handleCertTableAction);
+    confirmCancelBtn.addEventListener("click", function () {
+      resolveConfirmation(false);
+    });
+    confirmAcceptBtn.addEventListener("click", function () {
+      resolveConfirmation(true);
+    });
+    confirmOverlayEl.addEventListener("click", function (event) {
+      if (event.target === confirmOverlayEl) {
+        resolveConfirmation(false);
+      }
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && confirmResolver) {
+        resolveConfirmation(false);
+      }
+    });
     accessCodeInputEl.addEventListener("keydown", function (event) {
       if (event.key === "Enter") {
         unlockDashboard();
@@ -729,11 +804,13 @@
       logoutBtnEl.hidden = true;
     }
 
-    function logoutDashboard() {
-      const accepted = window.confirm("Se cerrara la sesion de administrador. Deseas continuar?");
-      if (!accepted) {
-        return;
-      }
+    async function logoutDashboard() {
+      const accepted = await askConfirmation(
+        "Cerrar sesion",
+        "Se cerrara la sesion de administrador. ¿Deseas continuar?",
+        "Cerrar sesion"
+      );
+      if (!accepted) return;
       sessionStorage.removeItem("jac_admin_ok");
       accessCodeInputEl.value = "";
       setAccessStatus("Sesion cerrada correctamente.");
@@ -813,7 +890,11 @@
         return;
       }
 
-      const accepted = window.confirm("Se registrara un nuevo afiliado en la base de datos. Deseas continuar?");
+      const accepted = await askConfirmation(
+        "Registrar afiliado",
+        "Se registrara un nuevo afiliado en la base de datos. ¿Deseas continuar?",
+        "Registrar"
+      );
       if (!accepted) {
         showToast("Registro de afiliado cancelado.", "warn");
         return;
@@ -979,7 +1060,11 @@
         return;
       }
 
-      const accepted = window.confirm("Se creara y guardara un certificado en la base oficial. Deseas continuar?");
+      const accepted = await askConfirmation(
+        "Emitir certificado",
+        "Se creara y guardara un certificado en la base oficial. ¿Deseas continuar?",
+        "Emitir"
+      );
       if (!accepted) {
         showToast("Emision cancelada.", "warn");
         return;
@@ -1032,16 +1117,18 @@
 
       if (action === "status") {
         const estado = (btn.dataset.estado || "").toUpperCase();
-        updateCertificateStatus(codigo, consecutivo, estado);
+        enterEditMode(cert, estado);
+        showToast("Completa la observacion de estado y guarda cambios.", "info");
         return;
       }
 
       if (action === "delete") {
-        deleteCertificate(codigo, consecutivo);
+        enterEditMode(cert, "ELIMINADO");
+        showToast("Indica la observacion de estado y guarda cambios.", "info");
       }
     }
 
-    function enterEditMode(cert) {
+    function enterEditMode(cert, forcedEstado) {
       editingCert = cert;
       set("fDocumento", cert.documento || "");
       set("fNombre", cert.nombre || "");
@@ -1053,8 +1140,10 @@
       set("fEmail", cert.email || "");
       set("fMotivo", cert.motivo || "");
       set("fObservaciones", cert.observaciones || "");
-      set("fEstado", (cert.estado || "ACTIVO"));
+      set("fEstado", (forcedEstado || cert.estado || "ACTIVO"));
+      set("fEstadoObs", cert.observacionesEstado || "");
       editEstadoWrapEl.hidden = false;
+      editEstadoObsWrapEl.hidden = false;
       updateCertBtnEl.hidden = false;
       cancelEditBtnEl.hidden = false;
       showToast("Edicion habilitada para " + (cert.consecutivo || cert.codigo || ""), "info");
@@ -1063,6 +1152,7 @@
     function exitEditMode() {
       editingCert = null;
       editEstadoWrapEl.hidden = true;
+      editEstadoObsWrapEl.hidden = true;
       updateCertBtnEl.hidden = true;
       cancelEditBtnEl.hidden = true;
       clearAdminForm();
@@ -1086,10 +1176,19 @@
         email: read("fEmail"),
         motivo: read("fMotivo"),
         observaciones: read("fObservaciones"),
+        observacionesEstado: read("fEstadoObs"),
         estado: read("fEstado") || "ACTIVO"
       };
+      if (payload.estado !== "ACTIVO" && !payload.observacionesEstado) {
+        setCreateStatus("Agrega una observacion para el estado " + payload.estado + ".", true);
+        return;
+      }
 
-      const accepted = window.confirm("Se actualizaran los datos del certificado. Deseas continuar?");
+      const accepted = await askConfirmation(
+        "Actualizar certificado",
+        "Se actualizaran los datos del certificado. ¿Deseas continuar?",
+        "Guardar cambios"
+      );
       if (!accepted) {
         showToast("Edicion cancelada.", "warn");
         return;
@@ -1112,7 +1211,11 @@
     }
 
     async function updateCertificateStatus(codigo, consecutivo, estado) {
-      const accepted = window.confirm("Se cambiara el estado a " + estado + ". Deseas continuar?");
+      const accepted = await askConfirmation(
+        "Cambiar estado",
+        "Se cambiara el estado a " + estado + ". ¿Deseas continuar?",
+        "Actualizar estado"
+      );
       if (!accepted) {
         showToast("Cambio de estado cancelado.", "warn");
         return;
@@ -1133,7 +1236,11 @@
     }
 
     async function deleteCertificate(codigo, consecutivo) {
-      const accepted = window.confirm("Se marcara el certificado como ELIMINADO. Deseas continuar?");
+      const accepted = await askConfirmation(
+        "Eliminar certificado",
+        "Se marcara el certificado como ELIMINADO. ¿Deseas continuar?",
+        "Eliminar"
+      );
       if (!accepted) {
         showToast("Eliminacion cancelada.", "warn");
         return;
@@ -1176,15 +1283,35 @@
       set("fEmail", "");
       set("fMotivo", "");
       set("fObservaciones", "");
+      set("fEstadoObs", "");
       set("fEstado", "ACTIVO");
       if (editingCert) {
         editingCert = null;
         editEstadoWrapEl.hidden = true;
+        editEstadoObsWrapEl.hidden = true;
         updateCertBtnEl.hidden = true;
         cancelEditBtnEl.hidden = true;
       }
       setCreateStatus("");
       lastCreatedEl.textContent = "";
+    }
+
+    function askConfirmation(title, message, confirmLabel) {
+      return new Promise(function (resolve) {
+        confirmResolver = resolve;
+        confirmTitleEl.textContent = title || "Confirmar accion";
+        confirmMessageEl.textContent = message || "¿Deseas continuar?";
+        confirmAcceptBtn.textContent = confirmLabel || "Confirmar";
+        confirmOverlayEl.hidden = false;
+      });
+    }
+
+    function resolveConfirmation(value) {
+      if (!confirmResolver) return;
+      confirmOverlayEl.hidden = true;
+      const resolver = confirmResolver;
+      confirmResolver = null;
+      resolver(Boolean(value));
     }
 
     async function apiRequest(method, params) {

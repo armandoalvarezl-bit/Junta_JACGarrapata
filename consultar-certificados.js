@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzoYR31at-OKkn9Qicw7n1cFclkzNXQYWid8V0gAe-0jy4b_5yxGT-bGFZDRLSP5e4v/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzi3IGrfQ7OvaWFyz3mZ8wTRZlapjG2k6lxZF0AdPD0EgNTGqlONbSvWlcT0jUJwYhC/exec";
 const SIGNER_NAME = "Jorge Pelferto Hernandez";
 const SIGNER_ID = "CC:98651838";
 const SIGNER_ROLE = "Presidente Junta";
@@ -131,14 +131,20 @@ const SIGNER_ROLE = "Presidente Junta";
       const fecha = formatDate(cert.fechaISO);
       const estado = String(cert.estado || "ACTIVO").toUpperCase();
       const valido = estado === "ACTIVO";
+      const tituloEstado = valido
+        ? "VALIDO"
+        : (estado === "VALIDACION" ? "BORRADOR EN VALIDACION" : estado);
+      const mensajeEstado = valido
+        ? "El certificado consultado se encuentra registrado en la base oficial de la organizacion."
+        : (estado === "VALIDACION"
+          ? "El certificado esta en validacion y solo puede verse como borrador."
+          : "El certificado consultado se encuentra " + escapeHtml(estado) + " y no es valido para tramites.");
+      const observacionesEstado = String(cert.observacionesEstado || "").trim();
       resultadoEl.innerHTML =
-        "<h3>ESTADO DEL CERTIFICADO: " + escapeHtml(valido ? "VALIDO" : estado) + "</h3>" +
-        "<p>" +
-          (valido
-            ? "El certificado consultado se encuentra registrado en la base oficial de la organizacion."
-            : "El certificado consultado se encuentra " + escapeHtml(estado) + " y no es valido para tramites.") +
-        "</p>" +
+        "<h3>ESTADO DEL CERTIFICADO: " + escapeHtml(tituloEstado) + "</h3>" +
+        "<p>" + mensajeEstado + "</p>" +
         "<p>" + (valido ? "Para obtener el documento, usa el boton de descarga." : "Si tienes dudas, consulta con la Junta.") + "</p>" +
+        (observacionesEstado ? "<p><strong>Observaciones:</strong> " + escapeHtml(observacionesEstado) + "</p>" : "") +
         "<div class='result-meta'>" +
         "<span>Consecutivo: " + escapeHtml(cert.consecutivo) + "</span>" +
         "<span>Codigo: " + escapeHtml(cert.codigo) + "</span>" +
@@ -202,7 +208,11 @@ const SIGNER_ROLE = "Presidente Junta";
       const estado = String(certificadoActual.estado || "ACTIVO").toUpperCase();
       if (estado !== "ACTIVO") {
         setStatus("El certificado esta " + estado + " y no se puede descargar.", true);
-        showToast("El certificado no esta activo.", "error");
+        await showAlert(
+          "No se puede descargar",
+          "El certificado esta en " + estado + " y solo podra descargarse cuando sea aprobado.",
+          "Entendido"
+        );
         return;
       }
       const password = normalizeDoc(certificadoActual.documento);
@@ -438,6 +448,19 @@ const SIGNER_ROLE = "Presidente Junta";
         confirmTitleEl.textContent = title || "Confirmar acción";
         confirmMessageEl.textContent = message || "¿Deseas continuar?";
         confirmAcceptBtn.textContent = confirmLabel || "Confirmar";
+        confirmCancelBtn.hidden = false;
+        confirmOverlayEl.hidden = false;
+        confirmAcceptBtn.focus();
+      });
+    }
+
+    function showAlert(title, message, acceptLabel) {
+      return new Promise(function (resolve) {
+        confirmResolver = resolve;
+        confirmTitleEl.textContent = title || "Atencion";
+        confirmMessageEl.textContent = message || "";
+        confirmAcceptBtn.textContent = acceptLabel || "Aceptar";
+        confirmCancelBtn.hidden = true;
         confirmOverlayEl.hidden = false;
         confirmAcceptBtn.focus();
       });
@@ -447,6 +470,7 @@ const SIGNER_ROLE = "Presidente Junta";
       if (!confirmResolver) return;
       const resolver = confirmResolver;
       confirmResolver = null;
+      confirmCancelBtn.hidden = false;
       confirmOverlayEl.hidden = true;
       resolver(Boolean(accepted));
     }

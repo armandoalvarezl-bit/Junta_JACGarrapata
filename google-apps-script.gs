@@ -4,6 +4,7 @@ const RESIDENTS_SHEET_NAME = "Residentes";
 const TIMEZONE = "America/Bogota";
 const DEFAULT_SIGNER_NAME = "Jorge Pelferto Hernandez";
 const DEFAULT_SIGNER_ROLE = "Presidente Junta";
+const AUTO_APPROVE_MS = 60 * 1000;
 
 const HEADERS = [
   "fechaISO",
@@ -21,6 +22,7 @@ const HEADERS = [
   "firmante",
   "cargoFirmante",
   "observaciones",
+  "observacionesEstado",
   "estado"
 ];
 
@@ -151,8 +153,17 @@ function handleRequest_(e) {
 }
 
 function listCertificates_(limit) {
-  const rows = readRows_();
-  const data = rows.map(rowToCertificate_).reverse();
+  const sheet = getSheet_();
+  const dataSet = readRowsWithIndexes_(sheet);
+  const rows = dataSet.rows;
+  const idx = dataSet.indexes;
+  autoApproveByTime_(sheet, rows, idx);
+  const data = rows
+    .map(function (row) { return rowToCertificate_(row, idx); })
+    .filter(function (cert) {
+      return normalizeEstado_(cert.estado || "ACTIVO") !== "ELIMINADO";
+    })
+    .reverse();
   return data.slice(0, limit);
 }
 
@@ -161,9 +172,13 @@ function findCertificate_(code, documento) {
     throw new Error("Debes enviar codigo o documento.");
   }
 
-  const rows = readRows_();
+  const sheet = getSheet_();
+  const dataSet = readRowsWithIndexes_(sheet);
+  const rows = dataSet.rows;
+  const idx = dataSet.indexes;
+  autoApproveByTime_(sheet, rows, idx);
   for (let i = rows.length - 1; i >= 0; i -= 1) {
-    const cert = rowToCertificate_(rows[i]);
+    const cert = rowToCertificate_(rows[i], idx);
     const byCode = code ? normalizeCode_(cert.codigo) === code : false;
     const byDoc = documento ? normalizeDoc_(cert.documento) === normalizeDoc_(documento) : false;
     if (byCode || byDoc) {
@@ -577,7 +592,26 @@ function createCertificate_(payload) {
 
   try {
     const sheet = getSheet_();
-    const rows = readRows_(sheet);
+    const dataSet = readRowsWithIndexes_(sheet);
+    const rows = dataSet.rows;
+    const idx = dataSet.indexes;
+    const normalizedDoc = normalizeDoc_(clean.documento);
+    const normalizedMotivo = normalizeHeader_(clean.motivo);
+
+    const lastCert = findLatestByDocument_(rows, idx, normalizedDoc);
+    if (lastCert) {
+      const lastEstado = normalizeEstado_(lastCert.estado || "ACTIVO");
+      if (lastEstado === "INACTIVO") {
+        throw new Error("No se puede emitir: el ultimo certificado quedo como INACTIVO (no aprobado).");
+      }
+      if (lastEstado === "VALIDACION") {
+        throw new Error("No se puede emitir: existe un certificado en VALIDACION para esta cedula.");
+      }
+    }
+
+    if (hasDuplicateCertificate_(rows, idx, normalizedDoc, normalizedMotivo)) {
+      throw new Error("Ya existe un certificado ACTIVO o en VALIDACION con el mismo motivo.");
+    }
 
     const cert = {
       fechaISO: new Date().toISOString(),
@@ -595,7 +629,8 @@ function createCertificate_(payload) {
       firmante: DEFAULT_SIGNER_NAME,
       cargoFirmante: DEFAULT_SIGNER_ROLE,
       observaciones: clean.observaciones || "",
-      estado: "ACTIVO"
+      observacionesEstado: "Pendiente de validacion",
+      estado: "VALIDACION"
     };
 
     sheet.appendRow([
@@ -614,6 +649,7 @@ function createCertificate_(payload) {
       cert.firmante,
       cert.cargoFirmante,
       cert.observaciones,
+      cert.observacionesEstado,
       cert.estado
     ]);
 
@@ -636,13 +672,23 @@ function updateCertificate_(payload) {
 
   try {
     const sheet = getSheet_();
-    const rows = readRows_(sheet);
+    const dataSet = readRowsWithIndexes_(sheet);
+    const rows = dataSet.rows;
+    const idx = dataSet.indexes;
     const match = findCertificateRow_(rows, code, consecutivo);
     if (!match) {
       throw new Error("No se encontro certificado para actualizar.");
     }
 
-    const current = rowToCertificate_(rows[match.index]);
+    if (Object.prototype.hasOwnProperty.call(payload || {}, "estado")) {
+      const estadoNormalizado = normalizeEstado_(clean.estado);
+      const obsEstado = normalizeText_(clean.observacionesEstado);
+      if (estadoNormalizado !== "ACTIVO" && !obsEstado) {
+        throw new Error("Debes enviar observaciones de estado.");
+      }
+    }
+
+    const current = rowToCertificate_(rows[match.index], idx);
     const updated = applyUpdate_(current, clean, payload);
     const rowValues = certificateToRow_(updated);
     sheet.getRange(match.index + 2, 1, 1, HEADERS.length).setValues([rowValues]);
@@ -662,11 +708,17 @@ function setCertificateStatus_(payload) {
   if (!clean.estado) {
     throw new Error("Debes enviar estado.");
   }
+  const estadoNormalizado = normalizeEstado_(clean.estado);
+  const obsEstado = normalizeText_(clean.observacionesEstado);
+  if (estadoNormalizado !== "ACTIVO" && !obsEstado) {
+    throw new Error("Debes enviar observaciones de estado.");
+  }
 
   return updateCertificate_({
     codigo: code,
     consecutivo: consecutivo,
-    estado: clean.estado
+    observacionesEstado: obsEstado,
+    estado: estadoNormalizado
   });
 }
 
@@ -680,6 +732,7 @@ function deleteCertificate_(payload) {
   return updateCertificate_({
     codigo: code,
     consecutivo: consecutivo,
+    observacionesEstado: normalizeText_(clean.observacionesEstado),
     estado: "ELIMINADO"
   });
 }
@@ -735,6 +788,7 @@ function sanitizeUpdatePayload_(payload) {
     firmante: normalizeText_(payload.firmante),
     cargoFirmante: normalizeText_(payload.cargoFirmante),
     observaciones: normalizeText_(payload.observaciones),
+    observacionesEstado: normalizeText_(payload.observacionesEstado),
     estado: normalizeText_(payload.estado)
   };
 }
@@ -812,24 +866,167 @@ function readRows_(sheet) {
   return target.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
 }
 
-function rowToCertificate_(row) {
+function readRowsWithIndexes_(sheet) {
+  const target = sheet || getSheet_();
+  const lastRow = target.getLastRow();
+  const lastCol = target.getLastColumn();
+  const indexes = getCertificateIndexes_(target);
+  if (lastRow < 2 || lastCol < 1) {
+    return { rows: [], indexes: indexes };
+  }
+  const rows = target.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  return { rows: rows, indexes: indexes };
+}
+
+function autoApproveByTime_(sheet, rows, idx) {
+  const now = Date.now();
+  const colEstado = resolveColumnIndex_(idx, "estado", 16);
+  const colObs = resolveColumnIndex_(idx, "observacionesEstado", 15);
+  if (colEstado === -1) return;
+
+  for (let i = 0; i < rows.length; i += 1) {
+    const cert = rowToCertificate_(rows[i], idx);
+    const estado = normalizeEstado_(cert.estado || "ACTIVO");
+    if (estado !== "VALIDACION") continue;
+    const createdAt = new Date(cert.fechaISO).getTime();
+    if (!Number.isFinite(createdAt)) continue;
+    if (now - createdAt < AUTO_APPROVE_MS) continue;
+
+    const autoObs = "Aprobado automatico por tiempo";
+    const currentObs = String(cert.observacionesEstado || "");
+    const nextObs = currentObs && normalizeHeader_(currentObs) !== "pendientedevalidacion"
+      ? currentObs
+      : autoObs;
+
+    updateCell_(sheet, i + 2, colEstado, "ACTIVO");
+    if (colObs !== -1) {
+      updateCell_(sheet, i + 2, colObs, nextObs);
+    }
+    ensureRowLength_(rows[i], colEstado);
+    rows[i][colEstado - 1] = "ACTIVO";
+    if (colObs !== -1) {
+      ensureRowLength_(rows[i], colObs);
+      rows[i][colObs - 1] = nextObs;
+    }
+  }
+}
+
+function resolveColumnIndex_(idx, key, fallbackIndex) {
+  const index = idx && typeof idx[key] === "number" ? idx[key] : -1;
+  const resolved = index !== -1 ? index : fallbackIndex;
+  if (resolved === undefined || resolved < 0) return -1;
+  return resolved + 1;
+}
+
+function updateCell_(sheet, row, col, value) {
+  sheet.getRange(row, col).setValue(value);
+}
+
+function ensureRowLength_(row, col) {
+  const target = col - 1;
+  if (row.length <= target) {
+    row.length = target + 1;
+  }
+}
+
+function getCertificateIndexes_(sheet) {
+  const lastCol = sheet.getLastColumn();
+  if (lastCol < 1) return {};
+  const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function (h) {
+    return normalizeHeader_(h);
+  });
+  const idxOf = function (name) {
+    return headers.indexOf(normalizeHeader_(name));
+  };
   return {
-    fechaISO: String(row[0] || ""),
-    consecutivo: String(row[1] || ""),
-    codigo: String(row[2] || ""),
-    nombre: String(row[3] || ""),
-    tipoDoc: String(row[4] || ""),
-    documento: String(row[5] || ""),
-    anios: String(row[6] || ""),
-    direccion: String(row[7] || ""),
-    nivelEducativo: String(row[8] || ""),
-    grupoPoblacional: String(row[9] || ""),
-    email: String(row[10] || ""),
-    motivo: String(row[11] || ""),
-    firmante: String(row[12] || ""),
-    cargoFirmante: String(row[13] || ""),
-    observaciones: String(row[14] || ""),
-    estado: String(row[15] || "")
+    fechaISO: idxOf("fechaISO"),
+    consecutivo: idxOf("consecutivo"),
+    codigo: idxOf("codigo"),
+    nombre: idxOf("nombre"),
+    tipoDoc: idxOf("tipoDoc"),
+    documento: idxOf("documento"),
+    anios: idxOf("anios"),
+    direccion: idxOf("direccion"),
+    nivelEducativo: idxOf("nivelEducativo"),
+    grupoPoblacional: idxOf("grupoPoblacional"),
+    email: idxOf("email"),
+    motivo: idxOf("motivo"),
+    firmante: idxOf("firmante"),
+    cargoFirmante: idxOf("cargoFirmante"),
+    observaciones: idxOf("observaciones"),
+    observacionesEstado: idxOf("observacionesEstado"),
+    estado: idxOf("estado")
+  };
+}
+
+function normalizeEstadoCandidate_(value) {
+  const raw = normalizeText_(value).toUpperCase();
+  const allowed = ["ACTIVO", "INACTIVO", "VALIDACION", "ELIMINADO"];
+  return allowed.indexOf(raw) === -1 ? "" : raw;
+}
+
+function findLatestByDocument_(rows, idx, normalizedDoc) {
+  if (!normalizedDoc) return null;
+  for (let i = rows.length - 1; i >= 0; i -= 1) {
+    const cert = rowToCertificate_(rows[i], idx);
+    if (normalizeDoc_(cert.documento || "") === normalizedDoc) {
+      return cert;
+    }
+  }
+  return null;
+}
+
+function hasDuplicateCertificate_(rows, idx, normalizedDoc, normalizedMotivo) {
+  if (!normalizedDoc || !normalizedMotivo) return false;
+  for (let i = rows.length - 1; i >= 0; i -= 1) {
+    const cert = rowToCertificate_(rows[i], idx);
+    if (normalizeDoc_(cert.documento || "") !== normalizedDoc) {
+      continue;
+    }
+    const motivo = normalizeHeader_(cert.motivo || "");
+    const estado = normalizeEstado_(cert.estado || "ACTIVO");
+    if (motivo === normalizedMotivo && (estado === "ACTIVO" || estado === "VALIDACION")) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function rowToCertificate_(row, idx) {
+  const get = function (key, fallbackIndex) {
+    const index = idx && typeof idx[key] === "number" ? idx[key] : -1;
+    const i = index !== -1 ? index : fallbackIndex;
+    if (i === undefined || i < 0 || i >= row.length) return "";
+    return String(row[i] || "");
+  };
+  let observacionesEstado = get("observacionesEstado", 15);
+  let estado = get("estado", 16);
+  if (!estado) {
+    const estadoLegacy = normalizeEstadoCandidate_(observacionesEstado);
+    if (estadoLegacy) {
+      estado = estadoLegacy;
+      observacionesEstado = "";
+    }
+  }
+
+  return {
+    fechaISO: get("fechaISO", 0),
+    consecutivo: get("consecutivo", 1),
+    codigo: get("codigo", 2),
+    nombre: get("nombre", 3),
+    tipoDoc: get("tipoDoc", 4),
+    documento: get("documento", 5),
+    anios: get("anios", 6),
+    direccion: get("direccion", 7),
+    nivelEducativo: get("nivelEducativo", 8),
+    grupoPoblacional: get("grupoPoblacional", 9),
+    email: get("email", 10),
+    motivo: get("motivo", 11),
+    firmante: get("firmante", 12),
+    cargoFirmante: get("cargoFirmante", 13),
+    observaciones: get("observaciones", 14),
+    observacionesEstado: observacionesEstado,
+    estado: estado
   };
 }
 
@@ -850,6 +1047,7 @@ function certificateToRow_(cert) {
     cert.firmante,
     cert.cargoFirmante,
     cert.observaciones,
+    cert.observacionesEstado,
     cert.estado
   ];
 }
@@ -886,6 +1084,7 @@ function applyUpdate_(current, payload, provided) {
   if (has("firmante")) updated.firmante = payload.firmante || updated.firmante;
   if (has("cargoFirmante")) updated.cargoFirmante = payload.cargoFirmante || updated.cargoFirmante;
   if (has("observaciones")) updated.observaciones = payload.observaciones;
+  if (has("observacionesEstado")) updated.observacionesEstado = payload.observacionesEstado;
 
   if (has("estado")) {
     updated.estado = normalizeEstado_(payload.estado);
